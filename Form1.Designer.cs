@@ -36,9 +36,12 @@
             but_maskWin = new Button();
             but_mask_lock = new Button();
             groupBox2 = new GroupBox();
+            groupBox3 = new GroupBox();
+            but_high_frequency = new Button();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)trackBar_bright).BeginInit();
             groupBox2.SuspendLayout();
+            groupBox3.SuspendLayout();
             SuspendLayout();
             // 
             // but_bright30
@@ -129,11 +132,32 @@
             groupBox2.Text = "档板保护";
             groupBox2.Enter += groupBox2_Enter;
             // 
+            // groupBox3
+            // 
+            groupBox3.Controls.Add(but_high_frequency);
+            groupBox3.Location = new Point(12, 216);
+            groupBox3.Name = "groupBox3";
+            groupBox3.Size = new Size(367, 71);
+            groupBox3.TabIndex = 5;
+            groupBox3.TabStop = false;
+            groupBox3.Text = "其它";
+            // 
+            // but_high_frequency
+            // 
+            but_high_frequency.Location = new Point(18, 33);
+            but_high_frequency.Name = "but_high_frequency";
+            but_high_frequency.Size = new Size(75, 23);
+            but_high_frequency.TabIndex = 0;
+            but_high_frequency.Text = "高频闪烁";
+            but_high_frequency.UseVisualStyleBackColor = true;
+            but_high_frequency.Click += but_high_frequency_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(413, 208);
+            ClientSize = new Size(397, 301);
+            Controls.Add(groupBox3);
             Controls.Add(groupBox2);
             Controls.Add(groupBox1);
             FormBorderStyle = FormBorderStyle.FixedSingle;
@@ -144,6 +168,7 @@
             groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)trackBar_bright).EndInit();
             groupBox2.ResumeLayout(false);
+            groupBox3.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -157,5 +182,7 @@
         private Button but_maskWin;
         private Button but_mask_lock;
         private GroupBox groupBox2;
+        private GroupBox groupBox3;
+        private Button but_high_frequency;
     }
 }

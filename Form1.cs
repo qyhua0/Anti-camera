@@ -270,14 +270,6 @@ namespace WinDisplay
 
 
 
-
-
-
-
-
-
-
-
         // 鼠标按下事件（开始拖动或调整大小）
         private void MaskForm_MouseDown(object sender, MouseEventArgs e)
         {
@@ -379,7 +371,7 @@ namespace WinDisplay
         private void ClearWindowClickThrough(IntPtr hWnd)
         {
             int exStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
- 
+
 
             // 确保只移除 WS_EX_TRANSPARENT，保留 WS_EX_LAYERED
             SetWindowLong(hWnd, GWL_EXSTYLE, (exStyle & ~WS_EX_TRANSPARENT) | WS_EX_LAYERED);
@@ -388,6 +380,12 @@ namespace WinDisplay
         private void groupBox2_Enter(object sender, EventArgs e)
         {
 
+        }
+
+        private void but_high_frequency_Click(object sender, EventArgs e)
+        {
+            Form2 form2= new Form2();
+            form2.Show();
         }
     }
 }
