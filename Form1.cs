@@ -6,12 +6,17 @@ namespace WinDisplay
     public partial class Form1 : Form
     {
 
+        private ContextMenuStrip trayMenu;
+
+
         private List<Form> maskForms = new List<Form>(); // 管理多个遮挡窗体
-        private bool isMaskLocked = false; // 默认不锁定
+        private bool isMaskLocked = false; // 默认不固定
         private const int resizeBorder = 5; // 边框区域宽度
         private bool isDragging = false;
         private bool isResizing = false;
         private Point lastMousePos;
+
+        private bool showMaskWin= true; //默认显示遮挡窗体
 
 
         Form maskForm;
@@ -20,6 +25,50 @@ namespace WinDisplay
         {
             InitializeComponent();
             //setBright(50);
+            InitializeSystemTray();
+        }
+
+        private void InitializeSystemTray()
+        {
+            // 创建托盘菜单
+            trayMenu = new ContextMenuStrip();
+            trayMenu.Items.Add("显示窗口", null, OnShow);
+            trayMenu.Items.Add("退出", null, OnExit);
+
+            _notifyIcon.ContextMenuStrip = trayMenu;
+            _notifyIcon.Visible = true;
+            _notifyIcon.Text = "防摄像头app";
+
+            // 托盘图标双击事件
+            _notifyIcon.DoubleClick += OnShow;
+        }
+
+
+        // 显示窗口
+        private void OnShow(object sender, EventArgs e)
+        {
+            this.Show();
+            this.WindowState = FormWindowState.Normal;
+            this.Activate();
+        }
+
+        // 退出程序
+        private void OnExit(object sender, EventArgs e)
+        {
+            _notifyIcon.Visible = false; // 先隐藏托盘图标
+            Application.Exit();
+        }
+
+        // 窗体关闭时最小化到托盘
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                e.Cancel = true; // 取消关闭
+                this.Hide(); // 隐藏窗体
+                _notifyIcon.ShowBalloonTip(1000, "提示", "程序已最小化到系统托盘", ToolTipIcon.Info);
+            }
+            base.OnFormClosing(e);
         }
 
 
@@ -242,7 +291,7 @@ namespace WinDisplay
         private void but_mask_lock_Click(object sender, EventArgs e)
         {
             isMaskLocked = !isMaskLocked;
-            this.but_mask_lock.Text = isMaskLocked ? "解锁" : "锁定";
+            this.but_mask_lock.Text = isMaskLocked ? "解锁档板" : "固定档板";
             UpdateMaskFormState();
         }
 
@@ -345,28 +394,7 @@ namespace WinDisplay
             SetWindowLong(hWnd, GWL_EXSTYLE, exStyle | WS_EX_LAYERED | WS_EX_TRANSPARENT);
         }
 
-        //private void but_mask_lock_Click(object sender, EventArgs e)
-        //{
-        //    isMaskLocked = !isMaskLocked;
-        //    this.but_mask_lock.Text = isMaskLocked ? "解锁" : "锁定";
-        //    UpdateMaskFormState();
-        //}
 
-        // 更新遮挡窗体状态
-        //private void UpdateMaskFormState()
-        //{
-        //    if (isMaskLocked)
-        //    {
-        //        SetWindowClickThrough(maskForm.Handle); // 事件穿透
-        //        maskForm.Cursor = Cursors.Default;
-        //    }
-        //    else
-        //    {
-        //        Console.WriteLine("交互");
-        //        ClearWindowClickThrough(maskForm.Handle); // 允许交互
-        //        maskForm.Cursor = Cursors.SizeAll; // 显示拖动光标
-        //    }
-        //}
 
         private void ClearWindowClickThrough(IntPtr hWnd)
         {
@@ -384,8 +412,43 @@ namespace WinDisplay
 
         private void but_high_frequency_Click(object sender, EventArgs e)
         {
-            Form2 form2= new Form2();
+            Form2 form2 = new Form2();
             form2.Show();
+        }
+
+
+        private void ExitApplication()
+        {
+            _notifyIcon.Visible = false; // 隐藏托盘图
+            Application.Exit(); // 完全退出程序
+        }
+
+        private void but_hide_Click(object sender, EventArgs e)
+        {
+            showMaskWindow();
+        }
+
+        private void showMaskWindow()
+        {
+            showMaskWin = !showMaskWin;
+            this.but_hide.Text = showMaskWin ? "隐藏档板" : "显示档板";
+            UpdateMaskFormHide();
+        }
+
+        private void UpdateMaskFormHide()
+        {
+            foreach (var maskForm in maskForms)
+            {
+                if (showMaskWin)
+                {
+                    maskForm.Show();
+                }
+                else
+                {
+                    maskForm.Hide();
+
+                }
+            }
         }
     }
 }

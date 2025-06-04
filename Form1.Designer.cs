@@ -28,6 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             but_bright30 = new Button();
             but_bright50 = new Button();
             but_bright70 = new Button();
@@ -36,8 +38,10 @@
             but_maskWin = new Button();
             but_mask_lock = new Button();
             groupBox2 = new GroupBox();
+            but_hide = new Button();
             groupBox3 = new GroupBox();
             but_high_frequency = new Button();
+            _notifyIcon = new NotifyIcon(components);
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)trackBar_bright).BeginInit();
             groupBox2.SuspendLayout();
@@ -106,7 +110,7 @@
             but_maskWin.Name = "but_maskWin";
             but_maskWin.Size = new Size(75, 23);
             but_maskWin.TabIndex = 2;
-            but_maskWin.Text = "挡板";
+            but_maskWin.Text = "添加挡板";
             but_maskWin.UseVisualStyleBackColor = true;
             but_maskWin.Click += but_maskWin_Click;
             // 
@@ -116,12 +120,13 @@
             but_mask_lock.Name = "but_mask_lock";
             but_mask_lock.Size = new Size(75, 23);
             but_mask_lock.TabIndex = 3;
-            but_mask_lock.Text = "锁定";
+            but_mask_lock.Text = "固定档板";
             but_mask_lock.UseVisualStyleBackColor = true;
             but_mask_lock.Click += but_mask_lock_Click;
             // 
             // groupBox2
             // 
+            groupBox2.Controls.Add(but_hide);
             groupBox2.Controls.Add(but_maskWin);
             groupBox2.Controls.Add(but_mask_lock);
             groupBox2.Location = new Point(12, 135);
@@ -131,6 +136,16 @@
             groupBox2.TabStop = false;
             groupBox2.Text = "档板保护";
             groupBox2.Enter += groupBox2_Enter;
+            // 
+            // but_hide
+            // 
+            but_hide.Location = new Point(239, 29);
+            but_hide.Name = "but_hide";
+            but_hide.Size = new Size(75, 23);
+            but_hide.TabIndex = 4;
+            but_hide.Text = "隐藏档板";
+            but_hide.UseVisualStyleBackColor = true;
+            but_hide.Click += but_hide_Click;
             // 
             // groupBox3
             // 
@@ -152,6 +167,12 @@
             but_high_frequency.UseVisualStyleBackColor = true;
             but_high_frequency.Click += but_high_frequency_Click;
             // 
+            // _notifyIcon
+            // 
+            _notifyIcon.Icon = (Icon)resources.GetObject("_notifyIcon.Icon");
+            _notifyIcon.Text = "notifyIcon1";
+            _notifyIcon.Visible = true;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
@@ -161,6 +182,7 @@
             Controls.Add(groupBox2);
             Controls.Add(groupBox1);
             FormBorderStyle = FormBorderStyle.FixedSingle;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "Form1";
             Text = "x-保护";
             Load += Form1_Load;
@@ -184,5 +206,7 @@
         private GroupBox groupBox2;
         private GroupBox groupBox3;
         private Button but_high_frequency;
+        private NotifyIcon _notifyIcon;
+        private Button but_hide;
     }
 }
