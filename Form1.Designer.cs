@@ -35,9 +35,12 @@
             but_bright70 = new Button();
             groupBox1 = new GroupBox();
             trackBar_bright = new TrackBar();
+            but_bright90 = new Button();
             but_maskWin = new Button();
             but_mask_lock = new Button();
             groupBox2 = new GroupBox();
+            label1 = new Label();
+            opt_apla1 = new NumericUpDown();
             but_hide = new Button();
             groupBox3 = new GroupBox();
             but_high_frequency = new Button();
@@ -45,6 +48,7 @@
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)trackBar_bright).BeginInit();
             groupBox2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)opt_apla1).BeginInit();
             groupBox3.SuspendLayout();
             SuspendLayout();
             // 
@@ -60,7 +64,7 @@
             // 
             // but_bright50
             // 
-            but_bright50.Location = new Point(113, 22);
+            but_bright50.Location = new Point(106, 22);
             but_bright50.Name = "but_bright50";
             but_bright50.Size = new Size(75, 23);
             but_bright50.TabIndex = 0;
@@ -70,7 +74,7 @@
             // 
             // but_bright70
             // 
-            but_bright70.Location = new Point(214, 22);
+            but_bright70.Location = new Point(196, 22);
             but_bright70.Name = "but_bright70";
             but_bright70.Size = new Size(75, 23);
             but_bright70.TabIndex = 0;
@@ -83,6 +87,7 @@
             // 
             groupBox1.Controls.Add(trackBar_bright);
             groupBox1.Controls.Add(but_bright30);
+            groupBox1.Controls.Add(but_bright90);
             groupBox1.Controls.Add(but_bright70);
             groupBox1.Controls.Add(but_bright50);
             groupBox1.Location = new Point(12, 12);
@@ -104,9 +109,19 @@
             trackBar_bright.Value = 1;
             trackBar_bright.Scroll += trackBar_bright_Scroll;
             // 
+            // but_bright90
+            // 
+            but_bright90.Location = new Point(286, 22);
+            but_bright90.Name = "but_bright90";
+            but_bright90.Size = new Size(75, 23);
+            but_bright90.TabIndex = 0;
+            but_bright90.Text = "90%";
+            but_bright90.UseVisualStyleBackColor = true;
+            but_bright90.Click += but_bright90_Click;
+            // 
             // but_maskWin
             // 
-            but_maskWin.Location = new Point(17, 28);
+            but_maskWin.Location = new Point(176, 23);
             but_maskWin.Name = "but_maskWin";
             but_maskWin.Size = new Size(75, 23);
             but_maskWin.TabIndex = 2;
@@ -116,7 +131,7 @@
             // 
             // but_mask_lock
             // 
-            but_mask_lock.Location = new Point(130, 28);
+            but_mask_lock.Location = new Point(13, 70);
             but_mask_lock.Name = "but_mask_lock";
             but_mask_lock.Size = new Size(75, 23);
             but_mask_lock.TabIndex = 3;
@@ -126,20 +141,41 @@
             // 
             // groupBox2
             // 
+            groupBox2.Controls.Add(label1);
+            groupBox2.Controls.Add(opt_apla1);
             groupBox2.Controls.Add(but_hide);
             groupBox2.Controls.Add(but_maskWin);
             groupBox2.Controls.Add(but_mask_lock);
             groupBox2.Location = new Point(12, 135);
             groupBox2.Name = "groupBox2";
-            groupBox2.Size = new Size(367, 72);
+            groupBox2.Size = new Size(367, 110);
             groupBox2.TabIndex = 4;
             groupBox2.TabStop = false;
             groupBox2.Text = "档板保护";
             groupBox2.Enter += groupBox2_Enter;
             // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(17, 28);
+            label1.Name = "label1";
+            label1.Size = new Size(71, 17);
+            label1.TabIndex = 6;
+            label1.Text = "档板透明度:";
+            // 
+            // opt_apla1
+            // 
+            opt_apla1.Location = new Point(95, 26);
+            opt_apla1.Maximum = new decimal(new int[] { 10, 0, 0, 0 });
+            opt_apla1.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            opt_apla1.Name = "opt_apla1";
+            opt_apla1.Size = new Size(54, 23);
+            opt_apla1.TabIndex = 5;
+            opt_apla1.Value = new decimal(new int[] { 5, 0, 0, 0 });
+            // 
             // but_hide
             // 
-            but_hide.Location = new Point(239, 29);
+            but_hide.Location = new Point(99, 70);
             but_hide.Name = "but_hide";
             but_hide.Size = new Size(75, 23);
             but_hide.TabIndex = 4;
@@ -150,7 +186,7 @@
             // groupBox3
             // 
             groupBox3.Controls.Add(but_high_frequency);
-            groupBox3.Location = new Point(12, 216);
+            groupBox3.Location = new Point(12, 251);
             groupBox3.Name = "groupBox3";
             groupBox3.Size = new Size(367, 71);
             groupBox3.TabIndex = 5;
@@ -177,7 +213,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(397, 301);
+            ClientSize = new Size(397, 334);
             Controls.Add(groupBox3);
             Controls.Add(groupBox2);
             Controls.Add(groupBox1);
@@ -190,6 +226,8 @@
             groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)trackBar_bright).EndInit();
             groupBox2.ResumeLayout(false);
+            groupBox2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)opt_apla1).EndInit();
             groupBox3.ResumeLayout(false);
             ResumeLayout(false);
         }
@@ -208,5 +246,8 @@
         private Button but_high_frequency;
         private NotifyIcon _notifyIcon;
         private Button but_hide;
+        private Label label1;
+        private NumericUpDown opt_apla1;
+        private Button but_bright90;
     }
 }

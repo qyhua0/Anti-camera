@@ -9,14 +9,14 @@ namespace WinDisplay
         private ContextMenuStrip trayMenu;
 
 
-        private List<Form> maskForms = new List<Form>(); // 管理多个遮挡窗体
+        private List<WeakReference<Form>> maskForms = new List<WeakReference<Form>>(); // 管理多个遮挡窗体
         private bool isMaskLocked = false; // 默认不固定
         private const int resizeBorder = 5; // 边框区域宽度
         private bool isDragging = false;
         private bool isResizing = false;
         private Point lastMousePos;
 
-        private bool showMaskWin= true; //默认显示遮挡窗体
+        private bool showMaskWin = true; //默认显示遮挡窗体
 
 
         Form maskForm;
@@ -153,59 +153,27 @@ namespace WinDisplay
             CreateMaskForm();
         }
 
-        // 创建遮挡窗体
-        private void CreateMaskFormOne()
-        {
-            maskForm = new Form
-            {
-                FormBorderStyle = FormBorderStyle.None,
-                BackColor = Color.Black,
-                Opacity = 0.5,
-                Size = new Size(200, 200),
-                Location = new Point(300, 300),
-                TopMost = true
-            };
 
-            // 添加水印
-            Label watermark = new Label
-            {
-                Text = $"Protected by {Environment.UserName}",
-                ForeColor = Color.White,
-                Font = new Font("Arial", 10),
-                AutoSize = true,
-                Location = new Point(10, 10)
-            };
-            maskForm.Controls.Add(watermark);
-
-            // 动态更新水印
-            var watermarkTimer = new System.Windows.Forms.Timer { Interval = 1000 };
-            watermarkTimer.Tick += (s, e) =>
-            {
-                watermark.Text = $"Protected by {Environment.UserName} at {DateTime.Now}";
-            };
-            watermarkTimer.Start();
-
-            // 鼠标事件处理（拖动和调整大小）
-            maskForm.MouseDown += MaskForm_MouseDown;
-            maskForm.MouseMove += MaskForm_MouseMove;
-            maskForm.MouseUp += MaskForm_MouseUp;
-
-            // 初始化窗体状态（根据 isMaskLocked）
-            UpdateMaskFormState();
-            maskForm.Show();
-        }
 
         // 创建遮挡窗体
         private void CreateMaskForm()
         {
+            double opacity = 0.5;
+            if (opt_apla1.Value != null)
+            {
+                opacity = (double)(opt_apla1.Value / 10);
+            }
+
             var maskForm = new Form
             {
                 FormBorderStyle = FormBorderStyle.None,
                 BackColor = Color.Black,
-                Opacity = 0.5,
+                Opacity = opacity,
                 Size = new Size(200, 200),
                 Location = new Point(300 + maskForms.Count * 20, 300 + maskForms.Count * 20), // 偏移避免重叠
-                TopMost = true
+                TopMost = true,
+                ShowInTaskbar = false,// 不显示在任务栏
+                KeyPreview = true,// 确保窗体能捕获键盘事件
             };
 
             // 添加水印
@@ -274,10 +242,13 @@ namespace WinDisplay
                 isResizing = false;
             };
 
-            // 添加到列表并初始化状态
-            maskForms.Add(maskForm);
-            UpdateMaskFormState();
+            maskForm.KeyDown += Form1_KeyDown;
+
+
+            //UpdateMaskFormState();
             maskForm.Show();
+            // 添加到列表并初始化状态
+            maskForms.Add(new WeakReference<Form>(maskForm));
         }
 
 
@@ -292,25 +263,63 @@ namespace WinDisplay
         {
             isMaskLocked = !isMaskLocked;
             this.but_mask_lock.Text = isMaskLocked ? "解锁档板" : "固定档板";
-            UpdateMaskFormState();
+            UpdateMaskFormState(1);
         }
 
         // 更新所有遮挡窗体状态
-        private void UpdateMaskFormState()
+        private void UpdateMaskFormState(int type)
         {
+
+            var formsToRemove = new List<WeakReference<Form>>(); // 临时列表
             foreach (var maskForm in maskForms)
             {
-                if (isMaskLocked)
+
+
+                if (maskForm.TryGetTarget(out Form form) && !form.IsDisposed)
                 {
-                    SetWindowClickThrough(maskForm.Handle); // 事件穿透
-                    maskForm.Cursor = Cursors.Default;
+
+                    if (type == 1)//固定或解锁档板
+                    {
+                        if (isMaskLocked)
+                        {
+                            SetWindowClickThrough(form.Handle); // 事件穿透
+                            form.Cursor = Cursors.Default;
+                        }
+                        else
+                        {
+                            ClearWindowClickThrough(form.Handle); // 允许交互
+                            form.Cursor = Cursors.SizeAll;
+                        }
+
+                    }
+                    else if (type == 2)//隐藏或显示档板
+                    {
+                        if (showMaskWin)
+                        {
+                            form.Show();
+                        }
+                        else
+                        {
+                            form.Hide();
+                        }
+
+                    }
+
                 }
                 else
                 {
-                    ClearWindowClickThrough(maskForm.Handle); // 允许交互
-                    maskForm.Cursor = Cursors.SizeAll;
+                    formsToRemove.Add(maskForm); // 清理无效引用
                 }
+
             }
+
+            // 遍历后移除
+            if (formsToRemove.Count > 0)
+            {
+                maskForms.RemoveAll(wr => formsToRemove.Contains(wr));
+            }
+            formsToRemove.Clear();
+
         }
 
 
@@ -432,23 +441,27 @@ namespace WinDisplay
         {
             showMaskWin = !showMaskWin;
             this.but_hide.Text = showMaskWin ? "隐藏档板" : "显示档板";
-            UpdateMaskFormHide();
+            UpdateMaskFormState(2);
         }
 
-        private void UpdateMaskFormHide()
-        {
-            foreach (var maskForm in maskForms)
-            {
-                if (showMaskWin)
-                {
-                    maskForm.Show();
-                }
-                else
-                {
-                    maskForm.Hide();
 
+
+
+        private void Form1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+            {
+                Form f = sender as Form;
+                if (f != null && !f.IsDisposed)
+                {
+                    f.Close(); // 关闭当前窗体
                 }
             }
+        }
+
+        private void but_bright90_Click(object sender, EventArgs e)
+        {
+            setBright(90);
         }
     }
 }
