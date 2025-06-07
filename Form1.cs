@@ -27,6 +27,20 @@ namespace WinDisplay
             //setBright(50);
             InitializeSystemTray();
             this.TopMost = true;
+            this.MaximizeBox = false; // 禁用最大化按钮
+
+
+            this.Resize += (s, e) =>
+            {
+                if (this.WindowState == FormWindowState.Minimized)
+                {
+                    // 在最小化时执行的代码
+                    isMaskLocked =true;
+                    this.but_mask_lock.Text = "解锁档板";
+                    UpdateMaskFormState(1);
+                }
+            };
+
 
         }
 
