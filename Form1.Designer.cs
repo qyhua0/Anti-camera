@@ -30,12 +30,16 @@
         {
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-            but_bright30 = new Button();
+            but_bright75 = new Button();
             but_bright50 = new Button();
             but_bright70 = new Button();
             groupBox1 = new GroupBox();
             trackBar_bright = new TrackBar();
             but_bright90 = new Button();
+            but_bright95 = new Button();
+            but_bright85 = new Button();
+            but_bright80 = new Button();
+            but_bright60 = new Button();
             but_maskWin = new Button();
             but_mask_lock = new Button();
             groupBox2 = new GroupBox();
@@ -60,21 +64,21 @@
             groupBox3.SuspendLayout();
             SuspendLayout();
             // 
-            // but_bright30
+            // but_bright75
             // 
-            but_bright30.Location = new Point(17, 22);
-            but_bright30.Name = "but_bright30";
-            but_bright30.Size = new Size(75, 23);
-            but_bright30.TabIndex = 0;
-            but_bright30.Text = "30%";
-            but_bright30.UseVisualStyleBackColor = true;
-            but_bright30.Click += but_bright30_Click;
+            but_bright75.Location = new Point(173, 22);
+            but_bright75.Name = "but_bright75";
+            but_bright75.Size = new Size(41, 23);
+            but_bright75.TabIndex = 0;
+            but_bright75.Text = "75%";
+            but_bright75.UseVisualStyleBackColor = true;
+            but_bright75.Click += but_bright75_Click;
             // 
             // but_bright50
             // 
-            but_bright50.Location = new Point(106, 22);
+            but_bright50.Location = new Point(17, 22);
             but_bright50.Name = "but_bright50";
-            but_bright50.Size = new Size(75, 23);
+            but_bright50.Size = new Size(41, 23);
             but_bright50.TabIndex = 0;
             but_bright50.Text = "50%";
             but_bright50.UseVisualStyleBackColor = true;
@@ -82,9 +86,9 @@
             // 
             // but_bright70
             // 
-            but_bright70.Location = new Point(196, 22);
+            but_bright70.Location = new Point(121, 22);
             but_bright70.Name = "but_bright70";
-            but_bright70.Size = new Size(75, 23);
+            but_bright70.Size = new Size(41, 23);
             but_bright70.TabIndex = 0;
             but_bright70.Text = "70%";
             but_bright70.UseVisualStyleBackColor = true;
@@ -94,9 +98,13 @@
             // groupBox1
             // 
             groupBox1.Controls.Add(trackBar_bright);
-            groupBox1.Controls.Add(but_bright30);
+            groupBox1.Controls.Add(but_bright75);
             groupBox1.Controls.Add(but_bright90);
+            groupBox1.Controls.Add(but_bright95);
+            groupBox1.Controls.Add(but_bright85);
+            groupBox1.Controls.Add(but_bright80);
             groupBox1.Controls.Add(but_bright70);
+            groupBox1.Controls.Add(but_bright60);
             groupBox1.Controls.Add(but_bright50);
             groupBox1.Location = new Point(30, 24);
             groupBox1.Name = "groupBox1";
@@ -112,20 +120,60 @@
             trackBar_bright.Maximum = 100;
             trackBar_bright.Minimum = 1;
             trackBar_bright.Name = "trackBar_bright";
-            trackBar_bright.Size = new Size(330, 45);
+            trackBar_bright.Size = new Size(384, 45);
             trackBar_bright.TabIndex = 1;
             trackBar_bright.Value = 1;
             trackBar_bright.Scroll += trackBar_bright_Scroll;
             // 
             // but_bright90
             // 
-            but_bright90.Location = new Point(286, 22);
+            but_bright90.Location = new Point(329, 22);
             but_bright90.Name = "but_bright90";
-            but_bright90.Size = new Size(75, 23);
+            but_bright90.Size = new Size(41, 23);
             but_bright90.TabIndex = 0;
             but_bright90.Text = "90%";
             but_bright90.UseVisualStyleBackColor = true;
             but_bright90.Click += but_bright90_Click;
+            // 
+            // but_bright95
+            // 
+            but_bright95.Location = new Point(381, 22);
+            but_bright95.Name = "but_bright95";
+            but_bright95.Size = new Size(41, 23);
+            but_bright95.TabIndex = 0;
+            but_bright95.Text = "95%";
+            but_bright95.UseVisualStyleBackColor = true;
+            but_bright95.Click += but_bright95_Click;
+            // 
+            // but_bright85
+            // 
+            but_bright85.Location = new Point(277, 22);
+            but_bright85.Name = "but_bright85";
+            but_bright85.Size = new Size(41, 23);
+            but_bright85.TabIndex = 0;
+            but_bright85.Text = "85%";
+            but_bright85.UseVisualStyleBackColor = true;
+            but_bright85.Click += but_bright85_Click;
+            // 
+            // but_bright80
+            // 
+            but_bright80.Location = new Point(225, 22);
+            but_bright80.Name = "but_bright80";
+            but_bright80.Size = new Size(41, 23);
+            but_bright80.TabIndex = 0;
+            but_bright80.Text = "80%";
+            but_bright80.UseVisualStyleBackColor = true;
+            but_bright80.Click += but_bright80_Click;
+            // 
+            // but_bright60
+            // 
+            but_bright60.Location = new Point(69, 22);
+            but_bright60.Name = "but_bright60";
+            but_bright60.Size = new Size(41, 23);
+            but_bright60.TabIndex = 0;
+            but_bright60.Text = "60%";
+            but_bright60.UseVisualStyleBackColor = true;
+            but_bright60.Click += but_bright60_Click;
             // 
             // but_maskWin
             // 
@@ -274,7 +322,7 @@
             groupBox3.Size = new Size(443, 71);
             groupBox3.TabIndex = 5;
             groupBox3.TabStop = false;
-            groupBox3.Text = "其它";
+            groupBox3.Text = "实验功能";
             // 
             // but_high_frequency
             // 
@@ -318,7 +366,7 @@
 
         #endregion
 
-        private Button but_bright30;
+        private Button but_bright75;
         private Button but_bright50;
         private Button but_bright70;
         private GroupBox groupBox1;
@@ -332,7 +380,7 @@
         private Button but_hide;
         private Label label1;
         private NumericUpDown opt_apla1;
-        private Button but_bright90;
+        private Button but_bright80;
         private GroupBox groupBox4;
         private Button but_post_left;
         private Button but_post_down;
@@ -340,5 +388,9 @@
         private Button but_post_right;
         private TextBox txt_maskform_tip;
         private Label label2;
+        private Button but_bright90;
+        private Button but_bright95;
+        private Button but_bright85;
+        private Button but_bright60;
     }
 }

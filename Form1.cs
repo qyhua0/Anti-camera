@@ -35,7 +35,7 @@ namespace WinDisplay
                 if (this.WindowState == FormWindowState.Minimized)
                 {
                     // 在最小化时执行的代码
-                    isMaskLocked =true;
+                    isMaskLocked = true;
                     this.but_mask_lock.Text = "解锁档板";
                     UpdateMaskFormState(1);
                 }
@@ -83,11 +83,11 @@ namespace WinDisplay
                 e.Cancel = true;
 
                 //最小化时强制锁定，防止误操作
-                isMaskLocked =true;
-                this.but_mask_lock.Text = "解锁档板" ;
+                isMaskLocked = true;
+                this.but_mask_lock.Text = "解锁档板";
                 UpdateMaskFormState(1);
 
-                this.Hide(); 
+                this.Hide();
 
                 _notifyIcon.ShowBalloonTip(1000, "提示", "程序已最小化到系统托盘", ToolTipIcon.Info);
             }
@@ -207,7 +207,7 @@ namespace WinDisplay
             // 添加水印
             Label watermark = new Label
             {
-                Text = txt_maskform_tip.Text+$"  {Environment.UserName}",
+                Text = txt_maskform_tip.Text + $"  {Environment.UserName}",
                 ForeColor = Color.White,
                 Font = new Font("Arial", 12),
                 AutoSize = true,
@@ -219,7 +219,7 @@ namespace WinDisplay
             var watermarkTimer = new System.Windows.Forms.Timer { Interval = 1000 };
             watermarkTimer.Tick += (s, e) =>
             {
-                watermark.Text = txt_maskform_tip.Text+$" {Environment.UserName} at {DateTime.Now}";
+                watermark.Text = txt_maskform_tip.Text + $" {Environment.UserName} at {DateTime.Now}";
             };
             watermarkTimer.Start();
 
@@ -521,7 +521,7 @@ namespace WinDisplay
         private bool hasMaskFormByTitle(string title)
         {
             //有窗口找到删除
-     
+
 
             foreach (var maskForm in maskForms)
             {
@@ -541,7 +541,7 @@ namespace WinDisplay
                     }
 
                 }
-               
+
 
             }
 
@@ -586,7 +586,7 @@ namespace WinDisplay
 
         private void button2_Click(object sender, EventArgs e)
         {
-            
+
         }
 
         private void but_post_right_Click(object sender, EventArgs e)
@@ -602,8 +602,34 @@ namespace WinDisplay
             Form form = CreateMaskForm(size, "sub_right");
 
             //重新定位
-            Point point = new Point(Screen.PrimaryScreen.Bounds.Right-400, Screen.PrimaryScreen.Bounds.Top); // 主屏幕左上角
+            Point point = new Point(Screen.PrimaryScreen.Bounds.Right - 400, Screen.PrimaryScreen.Bounds.Top); // 主屏幕左上角
             form.Location = point;
+        }
+
+        private void but_bright80_Click(object sender, EventArgs e)
+        {
+            setBright(80);
+        }
+
+        private void but_bright75_Click(object sender, EventArgs e)
+        {
+            setBright(75);
+
+        }
+
+        private void but_bright85_Click(object sender, EventArgs e)
+        {
+            setBright(85);
+        }
+
+        private void but_bright95_Click(object sender, EventArgs e)
+        {
+            setBright(95);
+        }
+
+        private void but_bright60_Click(object sender, EventArgs e)
+        {
+            setBright(60);
         }
     }
 }
