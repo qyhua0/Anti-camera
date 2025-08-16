@@ -54,9 +54,9 @@
             opt_apla1 = new NumericUpDown();
             but_hide = new Button();
             groupBox3 = new GroupBox();
+            but_netSafe = new Button();
             but_high_frequency = new Button();
             _notifyIcon = new NotifyIcon(components);
-            but_netSafe = new Button();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)trackBar_bright).BeginInit();
             groupBox2.SuspendLayout();
@@ -326,6 +326,16 @@
             groupBox3.TabStop = false;
             groupBox3.Text = "实验功能";
             // 
+            // but_netSafe
+            // 
+            but_netSafe.Location = new Point(111, 33);
+            but_netSafe.Name = "but_netSafe";
+            but_netSafe.Size = new Size(75, 23);
+            but_netSafe.TabIndex = 1;
+            but_netSafe.Text = "网络安全";
+            but_netSafe.UseVisualStyleBackColor = true;
+            but_netSafe.Click += but_netSafe_Click;
+            // 
             // but_high_frequency
             // 
             but_high_frequency.Location = new Point(18, 33);
@@ -342,16 +352,6 @@
             _notifyIcon.Text = "notifyIcon1";
             _notifyIcon.Visible = true;
             // 
-            // but_netSafe
-            // 
-            but_netSafe.Location = new Point(111, 33);
-            but_netSafe.Name = "but_netSafe";
-            but_netSafe.Size = new Size(75, 23);
-            but_netSafe.TabIndex = 1;
-            but_netSafe.Text = "网络安全";
-            but_netSafe.UseVisualStyleBackColor = true;
-            but_netSafe.Click += but_netSafe_Click;
-            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
@@ -363,7 +363,7 @@
             FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "Form1";
-            Text = "x-保护";
+            Text = "x-保护  (ver1.3)";
             Load += Form1_Load;
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
