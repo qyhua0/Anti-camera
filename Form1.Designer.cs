@@ -56,6 +56,7 @@
             groupBox3 = new GroupBox();
             but_high_frequency = new Button();
             _notifyIcon = new NotifyIcon(components);
+            but_netSafe = new Button();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)trackBar_bright).BeginInit();
             groupBox2.SuspendLayout();
@@ -316,6 +317,7 @@
             // 
             // groupBox3
             // 
+            groupBox3.Controls.Add(but_netSafe);
             groupBox3.Controls.Add(but_high_frequency);
             groupBox3.Location = new Point(24, 335);
             groupBox3.Name = "groupBox3";
@@ -339,6 +341,16 @@
             _notifyIcon.Icon = (Icon)resources.GetObject("_notifyIcon.Icon");
             _notifyIcon.Text = "notifyIcon1";
             _notifyIcon.Visible = true;
+            // 
+            // but_netSafe
+            // 
+            but_netSafe.Location = new Point(111, 33);
+            but_netSafe.Name = "but_netSafe";
+            but_netSafe.Size = new Size(75, 23);
+            but_netSafe.TabIndex = 1;
+            but_netSafe.Text = "网络安全";
+            but_netSafe.UseVisualStyleBackColor = true;
+            but_netSafe.Click += but_netSafe_Click;
             // 
             // Form1
             // 
@@ -392,5 +404,6 @@
         private Button but_bright95;
         private Button but_bright85;
         private Button but_bright60;
+        private Button but_netSafe;
     }
 }

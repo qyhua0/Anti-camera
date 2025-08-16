@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace WinDisplay
 {
-    public partial class Form2 : Form
+    public partial class frm_display_test : Form
     {
         private readonly System.Windows.Forms.Timer _timer;
         private bool _isHighContrast = true;
@@ -23,7 +23,7 @@ namespace WinDisplay
         private readonly double _minOpacity = 0.98; // 最小透明度
         private readonly double _maxOpacity = 1.0; // 最大透明度
 
-        public Form2()
+        public frm_display_test()
         {
             InitializeComponent();
 

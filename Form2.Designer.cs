@@ -1,6 +1,6 @@
 ﻿namespace WinDisplay
 {
-    partial class Form2
+    partial class frm_display_test
     {
         /// <summary>
         /// Required designer variable.
@@ -30,13 +30,13 @@
         {
             SuspendLayout();
             // 
-            // Form2
+            // frm_display_test
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(229, 78);
-            Name = "Form2";
-            Text = "Form2";
+            ClientSize = new Size(306, 125);
+            Name = "frm_display_test";
+            Text = "闪屏保护(实验)";
             Load += Form2_Load;
             ResumeLayout(false);
         }

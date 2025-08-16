@@ -452,7 +452,7 @@ namespace WinDisplay
 
         private void but_high_frequency_Click(object sender, EventArgs e)
         {
-            Form2 form2 = new Form2();
+            frm_display_test form2 = new frm_display_test();
             form2.Show();
         }
 
@@ -630,6 +630,17 @@ namespace WinDisplay
         private void but_bright60_Click(object sender, EventArgs e)
         {
             setBright(60);
+        }
+
+        Form_net net = null;
+        private void but_netSafe_Click(object sender, EventArgs e)
+        {
+            if (net == null)
+            {
+                net = new Form_net();
+            }
+            net.Show();
+
         }
     }
 }
