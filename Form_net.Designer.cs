@@ -33,20 +33,25 @@
             combo_devList = new ComboBox();
             label1 = new Label();
             but_stop = new Button();
+            tableLayoutPanel1 = new TableLayoutPanel();
+            panel1 = new Panel();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
+            tableLayoutPanel1.SuspendLayout();
+            panel1.SuspendLayout();
             SuspendLayout();
             // 
             // dataGridView1
             // 
             dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridView1.Location = new Point(12, 38);
+            dataGridView1.Dock = DockStyle.Fill;
+            dataGridView1.Location = new Point(3, 56);
             dataGridView1.Name = "dataGridView1";
-            dataGridView1.Size = new Size(1134, 400);
+            dataGridView1.Size = new Size(1152, 391);
             dataGridView1.TabIndex = 0;
             // 
             // but_start
             // 
-            but_start.Location = new Point(1003, 7);
+            but_start.Location = new Point(983, 14);
             but_start.Name = "but_start";
             but_start.Size = new Size(54, 23);
             but_start.TabIndex = 1;
@@ -57,15 +62,15 @@
             // combo_devList
             // 
             combo_devList.FormattingEnabled = true;
-            combo_devList.Location = new Point(86, 7);
+            combo_devList.Location = new Point(71, 11);
             combo_devList.Name = "combo_devList";
-            combo_devList.Size = new Size(911, 25);
+            combo_devList.Size = new Size(906, 25);
             combo_devList.TabIndex = 2;
             // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(12, 11);
+            label1.Location = new Point(3, 14);
             label1.Name = "label1";
             label1.Size = new Size(68, 17);
             label1.TabIndex = 3;
@@ -73,28 +78,54 @@
             // 
             // but_stop
             // 
-            but_stop.Location = new Point(1063, 7);
+            but_stop.Location = new Point(1043, 14);
             but_stop.Name = "but_stop";
             but_stop.Size = new Size(54, 23);
             but_stop.TabIndex = 1;
             but_stop.Text = "停止";
             but_stop.UseVisualStyleBackColor = true;
             // 
+            // tableLayoutPanel1
+            // 
+            tableLayoutPanel1.AutoSize = true;
+            tableLayoutPanel1.ColumnCount = 1;
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tableLayoutPanel1.Controls.Add(panel1, 0, 0);
+            tableLayoutPanel1.Controls.Add(dataGridView1, 0, 1);
+            tableLayoutPanel1.Dock = DockStyle.Fill;
+            tableLayoutPanel1.Location = new Point(0, 0);
+            tableLayoutPanel1.Name = "tableLayoutPanel1";
+            tableLayoutPanel1.RowCount = 2;
+            tableLayoutPanel1.RowStyles.Add(new RowStyle());
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tableLayoutPanel1.Size = new Size(1158, 450);
+            tableLayoutPanel1.TabIndex = 4;
+            // 
+            // panel1
+            // 
+            panel1.Controls.Add(label1);
+            panel1.Controls.Add(combo_devList);
+            panel1.Controls.Add(but_stop);
+            panel1.Controls.Add(but_start);
+            panel1.Location = new Point(3, 3);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(1103, 47);
+            panel1.TabIndex = 5;
+            // 
             // Form_net
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1158, 450);
-            Controls.Add(label1);
-            Controls.Add(combo_devList);
-            Controls.Add(but_stop);
-            Controls.Add(but_start);
-            Controls.Add(dataGridView1);
+            Controls.Add(tableLayoutPanel1);
             Name = "Form_net";
             Text = "网络安全";
             FormClosing += Form_net_FormClosing;
             Load += Form_net_Load;
             ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
+            tableLayoutPanel1.ResumeLayout(false);
+            panel1.ResumeLayout(false);
+            panel1.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -106,5 +137,7 @@
         private ComboBox combo_devList;
         private Label label1;
         private Button but_stop;
+        private TableLayoutPanel tableLayoutPanel1;
+        private Panel panel1;
     }
 }

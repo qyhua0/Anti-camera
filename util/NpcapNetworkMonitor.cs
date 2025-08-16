@@ -20,6 +20,10 @@ public static class NpcapNetworkMonitor
     private static readonly Dictionary<string, ConnView> _viewIndex = new(); // key -> ConnView
     private static int _uiUpdating = 0; // 0: idle, 1: updating
 
+    private static ContextMenuStrip _rowMenu;
+    private static ConnView _ctxRow; // 右键时选中的行数据
+
+
     // ===== 工具：给 DGV 开启双缓冲（WinForms 反射）=====
     private static void EnableDoubleBuffer(DataGridView dgv)
     {
@@ -28,6 +32,283 @@ public static class NpcapNetworkMonitor
             null, dgv, new object[] { true });
     }
 
+
+    private static bool TryParseEndpoint(string endpoint, out string ip, out int port)
+    {
+        ip = null; port = 0;
+        if (string.IsNullOrWhiteSpace(endpoint)) return false;
+
+        // 形如 "1.2.3.4:80" 或 "[2001:db8::1]:443"
+        try
+        {
+            if (endpoint.StartsWith("["))
+            {
+                int r = endpoint.IndexOf(']');
+                if (r > 0)
+                {
+                    ip = endpoint.Substring(1, r - 1);
+                    int c = endpoint.IndexOf(':', r + 1);
+                    if (c > 0) int.TryParse(endpoint.Substring(c + 1), out port);
+                    return true;
+                }
+            }
+            else
+            {
+                int c = endpoint.LastIndexOf(':');
+                if (c > 0)
+                {
+                    ip = endpoint.Substring(0, c);
+                    int.TryParse(endpoint.Substring(c + 1), out port);
+                    return true;
+                }
+            }
+        }
+        catch { }
+        return false;
+    }
+
+    private static void OpenFileLocation(string path)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+            {
+                MessageBox.Show("无法定位文件：路径不存在或无权限。", "提示",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "explorer.exe",
+                Arguments = $"/select,\"{path}\"",
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("打开文件位置失败：" + ex.Message, "错误",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    private static void OpenUrl(string url)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("打开浏览器失败：" + ex.Message, "错误",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    private static void KillProcess(int pid)
+    {
+        try
+        {
+            var p = Process.GetProcessById(pid);
+            p.Kill(entireProcessTree: true);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"结束进程失败：{ex.Message}\r\n请确认是否有管理员权限。", "错误",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    private static bool IsAdministrator()
+    {
+        try
+        {
+            var wi = System.Security.Principal.WindowsIdentity.GetCurrent();
+            var wp = new System.Security.Principal.WindowsPrincipal(wi);
+            return wp.IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator);
+        }
+        catch { return false; }
+    }
+
+    // 阻塞远程 IP（入站+出站）
+    private static void FirewallBlockIp(string ip)
+    {
+        if (!IsAdministrator())
+        {
+            MessageBox.Show("需要管理员权限才能修改防火墙规则。", "权限不足",
+                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        try
+        {
+            // 规则名尽量可读，避免重复
+            string ruleIn = $"NpcapBlock_IP_IN_{ip}";
+            string ruleOut = $"NpcapBlock_IP_OUT_{ip}";
+
+            // 先添加出站
+            RunNetsh($@"advfirewall firewall add rule name=""{ruleOut}"" dir=out action=block remoteip={ip}");
+            // 再添加入站
+            RunNetsh($@"advfirewall firewall add rule name=""{ruleIn}"" dir=in action=block remoteip={ip}");
+
+            MessageBox.Show($"已添加防火墙规则，阻止与 {ip} 的入站/出站流量。", "完成",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("添加防火墙规则失败：" + ex.Message, "错误",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    // 阻塞某个可执行文件的所有网络
+    private static void FirewallBlockApp(string exePath)
+    {
+        if (!IsAdministrator())
+        {
+            MessageBox.Show("需要管理员权限才能修改防火墙规则。", "权限不足",
+                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        try
+        {
+            if (string.IsNullOrWhiteSpace(exePath) || !File.Exists(exePath))
+            {
+                MessageBox.Show("可执行文件不存在。", "提示",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            string ruleOut = $"NpcapBlock_APP_OUT_{Path.GetFileName(exePath)}";
+            string ruleIn = $"NpcapBlock_APP_IN_{Path.GetFileName(exePath)}";
+
+            RunNetsh($@"advfirewall firewall add rule name=""{ruleOut}"" dir=out action=block program=""{exePath}"" enable=yes");
+            RunNetsh($@"advfirewall firewall add rule name=""{ruleIn}"" dir=in action=block program=""{exePath}"" enable=yes");
+
+            MessageBox.Show($"已阻止 {exePath} 的入站/出站网络访问。", "完成",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("添加防火墙规则失败：" + ex.Message, "错误",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    private static void RunNetsh(string arguments)
+    {
+        var psi = new ProcessStartInfo
+        {
+            FileName = "netsh",
+            Arguments = arguments,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            Verb = IsAdministrator() ? "" : "runas" // 已是管理员则不再弹 UAC
+        };
+        using var p = Process.Start(psi);
+        string stdout = p.StandardOutput.ReadToEnd();
+        string stderr = p.StandardError.ReadToEnd();
+        p.WaitForExit(8000);
+        if (p.ExitCode != 0)
+            throw new InvalidOperationException($"netsh 失败（{p.ExitCode}）：{stderr}\r\n{stdout}");
+    }
+
+
+    private static void InitRowContextMenu(DataGridView grid)
+    {
+        if (grid == null || grid.IsDisposed) return;
+
+        // 右键时选中所在行
+        grid.MouseDown += (s, e) =>
+        {
+            if (e.Button != MouseButtons.Right) return;
+            var hit = grid.HitTest(e.X, e.Y);
+            if (hit.Type == DataGridViewHitTestType.Cell && hit.RowIndex >= 0)
+            {
+                grid.ClearSelection();
+                grid.CurrentCell = grid.Rows[hit.RowIndex].Cells[hit.ColumnIndex];
+                grid.Rows[hit.RowIndex].Selected = true;
+                _ctxRow = grid.Rows[hit.RowIndex].DataBoundItem as ConnView;
+            }
+            else
+            {
+                _ctxRow = null;
+            }
+        };
+
+        // 构建菜单
+        _rowMenu = new ContextMenuStrip();
+
+        var miOpenFolder = new ToolStripMenuItem("定位文件路径");
+        miOpenFolder.Click += (s, e) => { if (_ctxRow != null) OpenFileLocation(_ctxRow.FilePath); };
+
+        var miSearchIp = new ToolStripMenuItem("搜索远程IP");
+        miSearchIp.Click += (s, e) =>
+        {
+            if (_ctxRow == null) return;
+            if (TryParseEndpoint(_ctxRow.Remote, out var ip, out _))
+                OpenUrl($"https://www.google.com/search?q={Uri.EscapeDataString(ip)}");
+        };
+
+        var miKill = new ToolStripMenuItem("结束进程");
+        miKill.Click += async (s, e) =>
+        {
+            if (_ctxRow == null) return;
+            if (MessageBox.Show($"结束进程 {_ctxRow.ProcessName} (PID={_ctxRow.PID})？",
+                    "确认", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+            {
+                await Task.Run(() => KillProcess(_ctxRow.PID));
+            }
+        };
+
+        var miFirewall = new ToolStripMenuItem("防火墙阻塞");
+        var miFwBlockIp = new ToolStripMenuItem("阻止远程IP（入站/出站）");
+        miFwBlockIp.Click += async (s, e) =>
+        {
+            if (_ctxRow == null) return;
+            if (TryParseEndpoint(_ctxRow.Remote, out var ip, out _))
+                await Task.Run(() => FirewallBlockIp(ip));
+        };
+
+        var miFwBlockApp = new ToolStripMenuItem("阻止该进程网络（按可执行文件）");
+        miFwBlockApp.Click += async (s, e) =>
+        {
+            if (_ctxRow == null) return;
+            var exe = _ctxRow.FilePath;
+            if (!string.IsNullOrWhiteSpace(exe))
+                await Task.Run(() => FirewallBlockApp(exe));
+        };
+        miFirewall.DropDownItems.Add(miFwBlockIp);
+        miFirewall.DropDownItems.Add(miFwBlockApp);
+
+        _rowMenu.Items.Add(miOpenFolder);
+        _rowMenu.Items.Add(new ToolStripSeparator());
+        _rowMenu.Items.Add(miSearchIp);
+        _rowMenu.Items.Add(new ToolStripSeparator());
+        _rowMenu.Items.Add(miKill);
+        _rowMenu.Items.Add(new ToolStripSeparator());
+        _rowMenu.Items.Add(miFirewall);
+
+        // 根据行数据启用/禁用菜单项
+        _rowMenu.Opening += (s, e) =>
+        {
+            var hasRow = _ctxRow != null;
+            miOpenFolder.Enabled = hasRow && !string.IsNullOrWhiteSpace(_ctxRow.FilePath);
+            miSearchIp.Enabled = hasRow && TryParseEndpoint(_ctxRow.Remote, out _, out _);
+            miKill.Enabled = hasRow && _ctxRow.PID > 0;
+            miFirewall.Enabled = hasRow;
+            miFwBlockIp.Enabled = hasRow && TryParseEndpoint(_ctxRow.Remote, out _, out _);
+            miFwBlockApp.Enabled = hasRow && !string.IsNullOrWhiteSpace(_ctxRow.FilePath);
+        };
+
+        grid.ContextMenuStrip = _rowMenu;
+    }
 
 
     // --- 公共 Start/Stop 接口 ---
@@ -63,8 +344,13 @@ public static class NpcapNetworkMonitor
                 col.SortMode = DataGridViewColumnSortMode.Automatic;
             }
 
+
+            InitRowContextMenu(_grid);
+
+
             EnableDoubleBuffer(_grid);
         });
+
 
         // 选择设备
         var devices = CaptureDeviceList.Instance;
