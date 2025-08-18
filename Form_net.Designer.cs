@@ -35,6 +35,7 @@
             but_stop = new Button();
             tableLayoutPanel1 = new TableLayoutPanel();
             panel1 = new Panel();
+            but_open_wf = new Button();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             tableLayoutPanel1.SuspendLayout();
             panel1.SuspendLayout();
@@ -46,12 +47,12 @@
             dataGridView1.Dock = DockStyle.Fill;
             dataGridView1.Location = new Point(3, 56);
             dataGridView1.Name = "dataGridView1";
-            dataGridView1.Size = new Size(1152, 391);
+            dataGridView1.Size = new Size(1285, 391);
             dataGridView1.TabIndex = 0;
             // 
             // but_start
             // 
-            but_start.Location = new Point(983, 14);
+            but_start.Location = new Point(929, 14);
             but_start.Name = "but_start";
             but_start.Size = new Size(54, 23);
             but_start.TabIndex = 1;
@@ -64,7 +65,7 @@
             combo_devList.FormattingEnabled = true;
             combo_devList.Location = new Point(71, 11);
             combo_devList.Name = "combo_devList";
-            combo_devList.Size = new Size(906, 25);
+            combo_devList.Size = new Size(853, 25);
             combo_devList.TabIndex = 2;
             // 
             // label1
@@ -78,12 +79,13 @@
             // 
             // but_stop
             // 
-            but_stop.Location = new Point(1043, 14);
+            but_stop.Location = new Point(989, 14);
             but_stop.Name = "but_stop";
             but_stop.Size = new Size(54, 23);
             but_stop.TabIndex = 1;
             but_stop.Text = "停止";
             but_stop.UseVisualStyleBackColor = true;
+            but_stop.Click += but_stop_Click;
             // 
             // tableLayoutPanel1
             // 
@@ -98,25 +100,36 @@
             tableLayoutPanel1.RowCount = 2;
             tableLayoutPanel1.RowStyles.Add(new RowStyle());
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tableLayoutPanel1.Size = new Size(1158, 450);
+            tableLayoutPanel1.Size = new Size(1291, 450);
             tableLayoutPanel1.TabIndex = 4;
             // 
             // panel1
             // 
+            panel1.Controls.Add(but_open_wf);
             panel1.Controls.Add(label1);
             panel1.Controls.Add(combo_devList);
             panel1.Controls.Add(but_stop);
             panel1.Controls.Add(but_start);
             panel1.Location = new Point(3, 3);
             panel1.Name = "panel1";
-            panel1.Size = new Size(1103, 47);
+            panel1.Size = new Size(1260, 47);
             panel1.TabIndex = 5;
+            // 
+            // but_open_wf
+            // 
+            but_open_wf.Location = new Point(1049, 14);
+            but_open_wf.Name = "but_open_wf";
+            but_open_wf.Size = new Size(85, 22);
+            but_open_wf.TabIndex = 4;
+            but_open_wf.Text = "系统防火墙";
+            but_open_wf.UseVisualStyleBackColor = true;
+            but_open_wf.Click += but_open_wf_Click;
             // 
             // Form_net
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1158, 450);
+            ClientSize = new Size(1291, 450);
             Controls.Add(tableLayoutPanel1);
             Name = "Form_net";
             Text = "网络安全";
@@ -139,5 +152,6 @@
         private Button but_stop;
         private TableLayoutPanel tableLayoutPanel1;
         private Panel panel1;
+        private Button but_open_wf;
     }
 }

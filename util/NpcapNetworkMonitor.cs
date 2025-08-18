@@ -4,6 +4,7 @@ using System.Text;
 using SharpPcap;
 using PacketDotNet;
 using WinDisplay.util;
+using System.Windows.Forms;
 
 
 /// <summary>
@@ -253,7 +254,7 @@ public static class NpcapNetworkMonitor
         {
             if (_ctxRow == null) return;
             if (TryParseEndpoint(_ctxRow.Remote, out var ip, out _))
-                OpenUrl($"https://www.google.com/search?q={Uri.EscapeDataString(ip)}");
+                OpenUrl($"https://www.bing.com/search?q={Uri.EscapeDataString(ip)}");
         };
 
         var miKill = new ToolStripMenuItem("结束进程");
@@ -335,14 +336,31 @@ public static class NpcapNetworkMonitor
             _grid.AllowUserToResizeColumns = true;
             _grid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing; // 只锁头高，不锁列宽
             _grid.RowHeadersVisible = false;
+            _grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            _grid.MultiSelect = false;
+
+
+           
+          
 
             // 列宽只在第一次初始化时给个基础值（存在就不覆盖）
             foreach (DataGridViewColumn col in _grid.Columns)
             {
                 col.AutoSizeMode = DataGridViewAutoSizeColumnMode.NotSet;
-                if (col.Width < 60) col.Width = 90;
+                if (col.Width < 60) col.Width = 100;
                 col.SortMode = DataGridViewColumnSortMode.Automatic;
             }
+
+
+            // 设置其他列自动填充
+            _grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            // 指定列宽度，不自动填充
+            SetColWidth(_grid, "PID", 60);
+            SetColWidth(_grid, "Protocol", 80);
+            SetColWidth(_grid, "ProcessName", 160);
+            SetColWidth(_grid, "FilePath", 550);
+
+
 
 
             InitRowContextMenu(_grid);
@@ -389,6 +407,13 @@ public static class NpcapNetworkMonitor
         }
     }
 
+    private static void SetColWidth(DataGridView grid, string colName, int width)
+    {
+        grid.Columns[colName].Width = width; 
+        //grid.Columns[colName].FillWeight = 1; // 可选：防止 Fill 影响它（但实际不会，因为不是 Fill 模式）                               
+        grid.Columns[colName].AutoSizeMode = DataGridViewAutoSizeColumnMode.None; // 列不参与自动填充（关键：将其 AutoSizeMode 设置为 None）
+    }
+
     public static void Stop()
     {
         _running = false;
@@ -420,21 +445,21 @@ public static class NpcapNetworkMonitor
         }
 
         // 清 UI
-        if (_grid != null)
-        {
-            _grid.InvokeIfRequired(() =>
-            {
-                if (!_grid.IsDisposed)
-                {
-                    // 不重建 DataSource，只清空数据，保留列与列宽
-                    _bs?.SuspendBinding();
-                    _binding?.Clear();
-                    _viewIndex.Clear();
-                    _bs?.ResumeBinding();
-                    // 不调用 _grid.Refresh(); 留给 WinForms 自己重绘
-                }
-            });
-        }
+        //if (_grid != null)
+        //{
+        //    _grid.InvokeIfRequired(() =>
+        //    {
+        //        if (!_grid.IsDisposed)
+        //        {
+        //            // 不重建 DataSource，只清空数据，保留列与列宽
+        //            _bs?.SuspendBinding();
+        //            _binding?.Clear();
+        //            _viewIndex.Clear();
+        //            _bs?.ResumeBinding();
+        //            // 不调用 _grid.Refresh(); 留给 WinForms 自己重绘
+        //        }
+        //    });
+        //}
 
         Debug.WriteLine("[Npcap] 监控已停止");
     }

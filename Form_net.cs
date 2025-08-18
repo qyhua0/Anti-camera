@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -24,7 +25,7 @@ namespace WinDisplay
         {
             //  NpcapNetworkMonitor.Start(dataGridView1);
             LoadNetworkDevices();
-
+            but_stop.Enabled = false;
 
         }
 
@@ -106,13 +107,32 @@ namespace WinDisplay
             {
                 // 调用 NpcapNetworkMonitor.Start，传入选择的设备索引
                 NpcapNetworkMonitor.Start(dataGridView1, deviceIndex: selectedDeviceIndex, refreshMs: 1000);
-                // btnStart.Enabled = false;
-                // btnStop.Enabled = true;
+                but_start.Enabled = false;
+                but_stop.Enabled = true;
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"启动监控失败: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void but_stop_Click(object sender, EventArgs e)
+        {
+            NpcapNetworkMonitor.Stop();
+            but_start.Enabled = true;
+            but_stop.Enabled = false;
+        }
+
+        private void but_open_wf_Click(object sender, EventArgs e)
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "cmd",
+                Arguments = "/c start wf.msc",
+                CreateNoWindow = true,
+                UseShellExecute = true,  // 必须为 true 才能使用 "start"
+                WindowStyle = ProcessWindowStyle.Hidden
+            });
         }
     }
 }
