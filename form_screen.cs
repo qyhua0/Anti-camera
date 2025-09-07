@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace WinDisplay
 {
-    public partial class Form1 : Form
+    public partial class frm_screen : Form
     {
 
         private ContextMenuStrip trayMenu;
@@ -21,7 +21,7 @@ namespace WinDisplay
 
         Form maskForm;
 
-        public Form1()
+        public frm_screen()
         {
             InitializeComponent();
             //setBright(50);
@@ -635,11 +635,23 @@ namespace WinDisplay
         Form_net net = null;
         private void but_netSafe_Click(object sender, EventArgs e)
         {
-            if (net == null)
+            if (net == null || net.IsDisposed)
             {
                 net = new Form_net();
+                net.FormClosing += (s, args) =>
+                {
+                    args.Cancel = true;
+                    net.Hide();
+                };
             }
+
             net.Show();
+            net.BringToFront();
+
+            // ?? 关键：使用 BeginInvoke 确保 UI 线程完成绘制后再置顶
+            net.BeginInvoke((MethodInvoker)delegate {
+                net.BringToFront();
+            });
 
         }
     }

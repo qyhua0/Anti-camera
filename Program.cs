@@ -32,7 +32,9 @@ namespace WinDisplay
                 {
                  
                     ApplicationConfiguration.Initialize();
-                    Application.Run(new Form1());
+                    //Application.Run(new Form1());
+                    Application.Run(new MainForm()); // ÐÞ¸Ä³É MainForm
+
                 }
                 else
                 {

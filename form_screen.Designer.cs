@@ -1,6 +1,6 @@
 ﻿namespace WinDisplay
 {
-    partial class Form1
+    partial class frm_screen
     {
         /// <summary>
         ///  Required designer variable.
@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frm_screen));
             but_bright75 = new Button();
             but_bright50 = new Button();
             but_bright70 = new Button();
@@ -54,7 +54,6 @@
             opt_apla1 = new NumericUpDown();
             but_hide = new Button();
             groupBox3 = new GroupBox();
-            but_netSafe = new Button();
             but_high_frequency = new Button();
             _notifyIcon = new NotifyIcon(components);
             groupBox1.SuspendLayout();
@@ -317,7 +316,6 @@
             // 
             // groupBox3
             // 
-            groupBox3.Controls.Add(but_netSafe);
             groupBox3.Controls.Add(but_high_frequency);
             groupBox3.Location = new Point(24, 335);
             groupBox3.Name = "groupBox3";
@@ -325,16 +323,6 @@
             groupBox3.TabIndex = 5;
             groupBox3.TabStop = false;
             groupBox3.Text = "实验功能";
-            // 
-            // but_netSafe
-            // 
-            but_netSafe.Location = new Point(111, 33);
-            but_netSafe.Name = "but_netSafe";
-            but_netSafe.Size = new Size(75, 23);
-            but_netSafe.TabIndex = 1;
-            but_netSafe.Text = "网络安全";
-            but_netSafe.UseVisualStyleBackColor = true;
-            but_netSafe.Click += but_netSafe_Click;
             // 
             // but_high_frequency
             // 
@@ -352,7 +340,7 @@
             _notifyIcon.Text = "notifyIcon1";
             _notifyIcon.Visible = true;
             // 
-            // Form1
+            // frm_screen
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -362,7 +350,7 @@
             Controls.Add(groupBox1);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");
-            Name = "Form1";
+            Name = "frm_screen";
             Text = "x-保护  (ver1.3)";
             Load += Form1_Load;
             groupBox1.ResumeLayout(false);
@@ -404,6 +392,5 @@
         private Button but_bright95;
         private Button but_bright85;
         private Button but_bright60;
-        private Button but_netSafe;
     }
 }
