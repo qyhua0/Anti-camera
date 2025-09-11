@@ -351,7 +351,7 @@
             FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "frm_screen";
-            Text = "x-保护  (ver1.3)";
+            Text = "屏幕保护";
             Load += Form1_Load;
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();

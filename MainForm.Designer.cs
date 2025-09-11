@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             tabControl1 = new TabControl();
             tabPage1 = new TabPage();
             tabPage2 = new TabPage();
@@ -70,8 +71,9 @@
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1202, 563);
             Controls.Add(tabControl1);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "MainForm";
-            Text = "MainForm";
+            Text = "x-保护  (ver1.4)";
             Load += MainForm_Load;
             tabControl1.ResumeLayout(false);
             ResumeLayout(false);

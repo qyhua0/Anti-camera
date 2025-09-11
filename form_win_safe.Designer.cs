@@ -62,7 +62,7 @@
             groupBox1.Size = new Size(765, 409);
             groupBox1.TabIndex = 1;
             groupBox1.TabStop = false;
-            groupBox1.Text = "常用安全功能";
+            groupBox1.Text = "安全面板";
             // 
             // groupBox3
             // 
