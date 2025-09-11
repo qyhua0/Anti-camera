@@ -5,41 +5,68 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using WinDisplay.util;
 
 namespace WinDisplay
 {
     public partial class form_win_safe : Form
     {
+
+
+
+
+
+
         public form_win_safe()
         {
             InitializeComponent();
         }
 
+
+
         private void but_evn_Click(object sender, EventArgs e)
         {
-            try
+            string processName = "mmc";
+            string windowTitleKeyword = "事件查看器"; // 主窗口标题通常包含此关键字
+
+            if (!SystemTools.ActivateWindowIfRunning(processName, windowTitleKeyword))
             {
-                Process.Start("eventvwr.exe");
-                // 或者使用：Process.Start("eventvwr.msc");
+                string program = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "eventvwr.exe");
+
+                // 如果没有找到正在运行的实例，则启动新进程
+                SystemTools.StartSystemTool(program, "事件查看器");
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine("无法打开事件查看器：" + ex.Message);
-            }
+
+
         }
+
+
+
+
 
         private void but_res_mon_Click(object sender, EventArgs e)
         {
-            try
+            //try
+            //{
+            //    Process.Start("resmon.exe");
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine("无法打开资源监视器：" + ex.Message);
+            //}
+            string processName = "perfmon";
+            string windowTitleKeyword = "资源监视器";
+
+            if (!SystemTools.ActivateWindowIfRunning(processName, windowTitleKeyword))
             {
-                Process.Start("resmon.exe");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("无法打开资源监视器：" + ex.Message);
+                string program = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "resmon.exe");
+
+                // 如果没有找到正在运行的实例，则启动新进程
+                SystemTools.StartSystemTool(program, "事件查看器");
             }
         }
 
@@ -150,6 +177,25 @@ namespace WinDisplay
             {
                 Console.WriteLine($"无法打开账户设置：{ex.Message}");
             }
+        }
+
+        private void but_autoruns_Click(object sender, EventArgs e)
+        {
+
+            string exePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "third_party", "Autoruns64.exe");
+            string processName = "Autoruns64"; 
+            string arguments = ""; // 如有参数可填写
+
+            SystemTools.StartOrActivateProcess(exePath, processName, arguments);
+        }
+
+        private void but_procexp_Click(object sender, EventArgs e)
+        {
+            string exePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "third_party", "procexp64.exe");
+            string processName = "procexp64"; 
+            string arguments = ""; // 如有参数可填写
+
+            SystemTools.StartOrActivateProcess(exePath, processName, arguments);
         }
     }
 }

@@ -30,16 +30,22 @@
         {
             but_evn = new Button();
             groupBox1 = new GroupBox();
+            groupBox3 = new GroupBox();
+            but_procexp = new Button();
+            but_autoruns = new Button();
+            groupBox2 = new GroupBox();
             but_computer = new Button();
+            but_res_mon = new Button();
             but_user = new Button();
             but_task = new Button();
-            but_res_mon = new Button();
             groupBox1.SuspendLayout();
+            groupBox3.SuspendLayout();
+            groupBox2.SuspendLayout();
             SuspendLayout();
             // 
             // but_evn
             // 
-            but_evn.Location = new Point(17, 31);
+            but_evn.Location = new Point(41, 46);
             but_evn.Name = "but_evn";
             but_evn.Size = new Size(75, 23);
             but_evn.TabIndex = 0;
@@ -49,11 +55,8 @@
             // 
             // groupBox1
             // 
-            groupBox1.Controls.Add(but_computer);
-            groupBox1.Controls.Add(but_user);
-            groupBox1.Controls.Add(but_task);
-            groupBox1.Controls.Add(but_res_mon);
-            groupBox1.Controls.Add(but_evn);
+            groupBox1.Controls.Add(groupBox3);
+            groupBox1.Controls.Add(groupBox2);
             groupBox1.Location = new Point(12, 12);
             groupBox1.Name = "groupBox1";
             groupBox1.Size = new Size(765, 409);
@@ -61,9 +64,54 @@
             groupBox1.TabStop = false;
             groupBox1.Text = "常用安全功能";
             // 
+            // groupBox3
+            // 
+            groupBox3.Controls.Add(but_procexp);
+            groupBox3.Controls.Add(but_autoruns);
+            groupBox3.Location = new Point(17, 194);
+            groupBox3.Name = "groupBox3";
+            groupBox3.Size = new Size(725, 189);
+            groupBox3.TabIndex = 1;
+            groupBox3.TabStop = false;
+            groupBox3.Text = "第三方安全工具";
+            // 
+            // but_procexp
+            // 
+            but_procexp.Location = new Point(141, 47);
+            but_procexp.Name = "but_procexp";
+            but_procexp.Size = new Size(75, 23);
+            but_procexp.TabIndex = 0;
+            but_procexp.Text = "procexp";
+            but_procexp.UseVisualStyleBackColor = true;
+            but_procexp.Click += but_procexp_Click;
+            // 
+            // but_autoruns
+            // 
+            but_autoruns.Location = new Point(41, 47);
+            but_autoruns.Name = "but_autoruns";
+            but_autoruns.Size = new Size(75, 23);
+            but_autoruns.TabIndex = 0;
+            but_autoruns.Text = "Autoruns";
+            but_autoruns.UseVisualStyleBackColor = true;
+            but_autoruns.Click += but_autoruns_Click;
+            // 
+            // groupBox2
+            // 
+            groupBox2.Controls.Add(but_computer);
+            groupBox2.Controls.Add(but_evn);
+            groupBox2.Controls.Add(but_res_mon);
+            groupBox2.Controls.Add(but_user);
+            groupBox2.Controls.Add(but_task);
+            groupBox2.Location = new Point(17, 48);
+            groupBox2.Name = "groupBox2";
+            groupBox2.Size = new Size(725, 123);
+            groupBox2.TabIndex = 1;
+            groupBox2.TabStop = false;
+            groupBox2.Text = "win10系统工具";
+            // 
             // but_computer
             // 
-            but_computer.Location = new Point(426, 31);
+            but_computer.Location = new Point(450, 46);
             but_computer.Name = "but_computer";
             but_computer.Size = new Size(75, 23);
             but_computer.TabIndex = 0;
@@ -71,9 +119,19 @@
             but_computer.UseVisualStyleBackColor = true;
             but_computer.Click += but_computer_Click;
             // 
+            // but_res_mon
+            // 
+            but_res_mon.Location = new Point(141, 46);
+            but_res_mon.Name = "but_res_mon";
+            but_res_mon.Size = new Size(75, 23);
+            but_res_mon.TabIndex = 0;
+            but_res_mon.Text = "资源监控";
+            but_res_mon.UseVisualStyleBackColor = true;
+            but_res_mon.Click += but_res_mon_Click;
+            // 
             // but_user
             // 
-            but_user.Location = new Point(318, 31);
+            but_user.Location = new Point(342, 46);
             but_user.Name = "but_user";
             but_user.Size = new Size(75, 23);
             but_user.TabIndex = 0;
@@ -83,23 +141,13 @@
             // 
             // but_task
             // 
-            but_task.Location = new Point(213, 31);
+            but_task.Location = new Point(237, 46);
             but_task.Name = "but_task";
             but_task.Size = new Size(75, 23);
             but_task.TabIndex = 0;
             but_task.Text = "任务管理器";
             but_task.UseVisualStyleBackColor = true;
             but_task.Click += but_task_Click;
-            // 
-            // but_res_mon
-            // 
-            but_res_mon.Location = new Point(117, 31);
-            but_res_mon.Name = "but_res_mon";
-            but_res_mon.Size = new Size(75, 23);
-            but_res_mon.TabIndex = 0;
-            but_res_mon.Text = "资源监控";
-            but_res_mon.UseVisualStyleBackColor = true;
-            but_res_mon.Click += but_res_mon_Click;
             // 
             // form_win_safe
             // 
@@ -110,6 +158,8 @@
             Name = "form_win_safe";
             Text = "windows 安全功能面板";
             groupBox1.ResumeLayout(false);
+            groupBox3.ResumeLayout(false);
+            groupBox2.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -121,5 +171,9 @@
         private Button but_user;
         private Button but_task;
         private Button but_res_mon;
+        private GroupBox groupBox3;
+        private Button but_autoruns;
+        private GroupBox groupBox2;
+        private Button but_procexp;
     }
 }

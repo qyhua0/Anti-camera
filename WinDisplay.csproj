@@ -11,7 +11,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="third_party\Autoruns64.exe" />
+    <None Remove="third_party\procexp64.exe" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="img\privacy_secure_anonymous_hide_icon.ico" />
+    <Content Include="third_party\Autoruns64.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="third_party\procexp64.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
