@@ -75,6 +75,10 @@ namespace WinDisplay
             // 安全控制面板模块
             var securePanel = new form_win_safe();
             LoadFormInTab(securePanel, "安全功能面板");
+
+            // 清理垃圾模块
+            var formClear = new form_clear();
+            LoadFormInTab(formClear, "清理垃圾模块");
         }
 
         /// <summary>
