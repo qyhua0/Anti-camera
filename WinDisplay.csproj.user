@@ -4,6 +4,9 @@
     <Compile Update="form_clear.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="form_safe_remove.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="form_screen.cs">
       <SubType>Form</SubType>
     </Compile>

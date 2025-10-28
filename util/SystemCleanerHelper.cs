@@ -200,11 +200,199 @@ namespace WinDisplay.util
                 cleanWorker.RunWorkerCompleted += CleanWorker_RunWorkerCompleted;
             }
 
-            #endregion
+        #endregion
 
-            #region 扫描相关方法
+        #region 扫描相关方法
 
-            private void ScanWorker_DoWork(object sender, DoWorkEventArgs e)
+        /// <summary>
+        /// 扫描浏览器缓存
+        /// </summary>
+        private List<CleanItem> ScanBrowserCaches()
+        {
+            List<CleanItem> items = new List<CleanItem>();
+            string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+
+            try
+            {
+                // Chrome缓存
+                string chromePath = Path.Combine(localAppData, @"Google\Chrome\User Data\Default\Cache");
+                if (Directory.Exists(chromePath))
+                    items.Add(ScanDirectory(chromePath, "Chrome浏览器缓存", "*.*"));
+
+                // Edge缓存
+                string edgePath = Path.Combine(localAppData, @"Microsoft\Edge\User Data\Default\Cache");
+                if (Directory.Exists(edgePath))
+                    items.Add(ScanDirectory(edgePath, "Edge浏览器缓存", "*.*"));
+
+                // Firefox缓存
+                string firefoxProfile = Path.Combine(localAppData, @"Mozilla\Firefox\Profiles");
+                if (Directory.Exists(firefoxProfile))
+                {
+                    foreach (var dir in Directory.GetDirectories(firefoxProfile))
+                    {
+                        string cachePath = Path.Combine(dir, "cache2");
+                        if (Directory.Exists(cachePath))
+                            items.Add(ScanDirectory(cachePath, "Firefox浏览器缓存", "*.*"));
+                    }
+                }
+
+                // IE缓存
+                string ieCachePath = Path.Combine(localAppData, @"Microsoft\Windows\INetCache");
+                if (Directory.Exists(ieCachePath))
+                    items.Add(ScanDirectory(ieCachePath, "IE浏览器缓存", "*.*"));
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"扫描浏览器缓存失败: {ex.Message}");
+            }
+
+            return items;
+        }
+
+        /// <summary>
+        /// 扫描休眠文件
+        /// </summary>
+        private CleanItem ScanHibernateFile()
+        {
+            CleanItem item = new CleanItem
+            {
+                Name = "休眠文件 (hiberfil.sys)",
+                Path = @"C:\hiberfil.sys",
+                Size = 0,
+                FileCount = 0
+            };
+
+            try
+            {
+                string hibernateFile = @"C:\hiberfil.sys";
+                if (File.Exists(hibernateFile))
+                {
+                    FileInfo fi = new FileInfo(hibernateFile);
+                    item.Size = fi.Length;
+                    item.FileCount = 1;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"扫描休眠文件失败: {ex.Message}");
+            }
+
+            return item;
+        }
+
+        /// <summary>
+        /// 扫描系统还原点
+        /// </summary>
+        private CleanItem ScanSystemRestorePoints()
+        {
+            CleanItem item = new CleanItem
+            {
+                Name = "系统还原点 (保留最新1个)",
+                Path = @"C:\System Volume Information",
+                Size = 0,
+                FileCount = 0
+            };
+
+            try
+            {
+                // 使用WMI查询还原点信息
+                using (var searcher = new System.Management.ManagementObjectSearcher(
+                    "root\\default", "SELECT * FROM SystemRestore"))
+                {
+                    int restorePointCount = 0;
+                    foreach (System.Management.ManagementObject obj in searcher.Get())
+                    {
+                        restorePointCount++;
+                    }
+                    item.FileCount = Math.Max(0, restorePointCount - 1); // 保留最新1个
+                }
+
+                // 估算大小（System Volume Information文件夹）
+                string sviPath = @"C:\System Volume Information";
+                if (Directory.Exists(sviPath))
+                {
+                    DirectoryInfo di = new DirectoryInfo(sviPath);
+                    foreach (FileInfo file in di.GetFiles("*", SearchOption.AllDirectories))
+                    {
+                        try
+                        {
+                            item.Size += file.Length;
+                        }
+                        catch { }
+                    }
+                    // 减去最新还原点的估算大小（保留约30%）
+                    item.Size = (long)(item.Size * 0.7);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"扫描还原点失败: {ex.Message}");
+            }
+
+            return item;
+        }
+
+        /// <summary>
+        /// 扫描WinSxS组件存储
+        /// </summary>
+        private CleanItem ScanWinSxS()
+        {
+            CleanItem item = new CleanItem
+            {
+                Name = "WinSxS组件存储清理",
+                Path = @"C:\Windows\WinSxS",
+                Size = 0,
+                FileCount = 0
+            };
+
+            try
+            {
+                // 使用DISM命令查询可清理的大小
+                ProcessStartInfo psi = new ProcessStartInfo
+                {
+                    FileName = "Dism.exe",
+                    Arguments = "/Online /Cleanup-Image /AnalyzeComponentStore",
+                    CreateNoWindow = true,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    WindowStyle = ProcessWindowStyle.Hidden
+                };
+
+                Process process = Process.Start(psi);
+                string output = process.StandardOutput.ReadToEnd();
+                process.WaitForExit();
+
+                // 解析输出获取可回收大小
+                if (output.Contains("可回收") || output.Contains("Reclaimable"))
+                {
+                    // 简化处理：估算WinSxS中可清理的大小
+                    string winsxsPath = @"C:\Windows\WinSxS\Backup";
+                    if (Directory.Exists(winsxsPath))
+                    {
+                        DirectoryInfo di = new DirectoryInfo(winsxsPath);
+                        foreach (FileInfo file in di.GetFiles("*", SearchOption.AllDirectories))
+                        {
+                            try
+                            {
+                                item.Size += file.Length;
+                            }
+                            catch { }
+                        }
+                    }
+                    item.FileCount = 1;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"扫描WinSxS失败: {ex.Message}");
+            }
+
+            return item;
+        }
+
+
+        private void ScanWorker_DoWork(object sender, DoWorkEventArgs e)
             {
                 ScanControls controls = (ScanControls)e.Argument;
                 List<CleanItem> items = new List<CleanItem>();
@@ -277,7 +465,29 @@ namespace WinDisplay.util
                 if (Directory.Exists(defenderHistory))
                     items.Add(ScanDirectory(defenderHistory, "Windows Defender扫描历史", "*.*"));
 
-                scanWorker.ReportProgress(100, "扫描完成！");
+            // 12. 浏览器缓存
+            scanWorker.ReportProgress(75, "正在扫描浏览器缓存...");
+            items.AddRange(ScanBrowserCaches());
+
+            // 13. 休眠文件
+            scanWorker.ReportProgress(80, "正在扫描休眠文件...");
+            CleanItem hibernateItem = ScanHibernateFile();
+            if (hibernateItem != null && hibernateItem.Size > 0)
+                items.Add(hibernateItem);
+
+            // 14. 系统还原点
+            scanWorker.ReportProgress(85, "正在扫描系统还原点...");
+            CleanItem restoreItem = ScanSystemRestorePoints();
+            if (restoreItem != null && restoreItem.Size > 0)
+                items.Add(restoreItem);
+
+            // 15. WinSxS组件存储
+            scanWorker.ReportProgress(90, "正在扫描WinSxS组件...");
+            CleanItem winsxsItem = ScanWinSxS();
+            if (winsxsItem != null && winsxsItem.Size > 0)
+                items.Add(winsxsItem);
+
+            scanWorker.ReportProgress(100, "扫描完成！");
                 e.Result = new ScanResult
                 {
                     Items = items.Where(item => item != null && item.Size > 0).ToList(),
@@ -584,6 +794,11 @@ namespace WinDisplay.util
             public List<string> FailedItems { get; set; }
             public CleanData Controls { get; set; }
         }
+
+
+
+       
+    
 
         #endregion
     }

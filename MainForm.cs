@@ -78,7 +78,11 @@ namespace WinDisplay
 
             // 清理垃圾模块
             var formClear = new form_clear();
-            LoadFormInTab(formClear, "清理垃圾模块");
+            LoadFormInTab(formClear, "清理垃圾");
+
+            //文件删除
+            var formRemove = new form_safe_remove();
+            LoadFormInTab(formRemove, "文件粉碎");
         }
 
         /// <summary>
