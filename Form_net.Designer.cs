@@ -1,157 +1,218 @@
-﻿namespace WinDisplay
+﻿/*
+ * x-保护 (WinDisplay) v2.0 —— 屏幕隐私防护工具
+ * 文件：Form_net.Designer.cs
+ * 作者：zhenhua
+ * 说明：「网络流量分析」模块的设计器生成代码（网卡下拉、开始/停止按钮、连接表格、状态胶囊）。
+ */
+using WinDisplay.Ui;
+
+namespace WinDisplay
 {
     partial class Form_net
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private System.Windows.Forms.TableLayoutPanel root;
+        private System.Windows.Forms.TableLayoutPanel body;
+        private PageHeader header;
+        private CardPanel cardDevice;
+        private CardPanel cardList;
+        private System.Windows.Forms.FlowLayoutPanel deviceFlow;
+        private Label label1;
+        private ComboBox combo_devList;
+        private FlatButton but_start;
+        private FlatButton but_stop;
+        private FlatButton but_open_wf;
+        private Label lblDeviceHint;
+        private StatusPill pillState;
+        private DataGridView dataGridView1;
+        private Label lblGridHint;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
+            if (disposing)
             {
-                components.Dispose();
+                dataGridView1?.Dispose();
             }
             base.Dispose(disposing);
         }
 
-        #region Windows Form Designer generated code
-
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
             dataGridView1 = new DataGridView();
-            but_start = new Button();
-            combo_devList = new ComboBox();
+            lblGridHint = new Label();
+            root = new System.Windows.Forms.TableLayoutPanel();
+            body = new System.Windows.Forms.TableLayoutPanel();
+            cardDevice = new CardPanel();
+            deviceFlow = new System.Windows.Forms.FlowLayoutPanel();
             label1 = new Label();
-            but_stop = new Button();
-            tableLayoutPanel1 = new TableLayoutPanel();
-            panel1 = new Panel();
-            but_open_wf = new Button();
-            ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
-            tableLayoutPanel1.SuspendLayout();
-            panel1.SuspendLayout();
+            combo_devList = new ComboBox();
+            but_start = new FlatButton();
+            but_stop = new FlatButton();
+            but_open_wf = new FlatButton();
+            lblDeviceHint = new Label();
+            cardList = new CardPanel();
+            pillState = new StatusPill();
+            header = new PageHeader();
+            root.SuspendLayout();
+            body.SuspendLayout();
+            cardDevice.SuspendLayout();
+            deviceFlow.SuspendLayout();
+            cardList.SuspendLayout();
             SuspendLayout();
             // 
-            // dataGridView1
+            // root
             // 
-            dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridView1.Dock = DockStyle.Fill;
-            dataGridView1.Location = new Point(3, 56);
-            dataGridView1.Name = "dataGridView1";
-            dataGridView1.Size = new Size(1285, 391);
-            dataGridView1.TabIndex = 0;
+            root.ColumnCount = 1;
+            root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            root.Controls.Add(header, 0, 0);
+            root.Controls.Add(body, 0, 1);
+            root.Dock = DockStyle.Fill;
+            root.Name = "root";
+            root.Padding = new Padding(UiTheme.PagePadding, UiTheme.PagePadding, UiTheme.PagePadding, UiTheme.PagePadding);
+            root.RowCount = 2;
+            root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            root.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             // 
-            // but_start
+            // header
             // 
-            but_start.Location = new Point(929, 14);
-            but_start.Name = "but_start";
-            but_start.Size = new Size(54, 23);
-            but_start.TabIndex = 1;
-            but_start.Text = "启动";
-            but_start.UseVisualStyleBackColor = true;
-            but_start.Click += but_start_Click;
+            header.Description = "实时列出每个进程的连接与速率；需要先装 Npcap，并以管理员身份运行才能抓到包。";
+            header.Dock = DockStyle.Fill;
+            header.Name = "header";
+            header.Title = "网络流量分析";
             // 
-            // combo_devList
+            // body
             // 
-            combo_devList.FormattingEnabled = true;
-            combo_devList.Location = new Point(71, 11);
-            combo_devList.Name = "combo_devList";
-            combo_devList.Size = new Size(853, 25);
-            combo_devList.TabIndex = 2;
+            body.ColumnCount = 1;
+            body.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            body.Controls.Add(cardDevice, 0, 0);
+            body.Controls.Add(cardList, 0, 1);
+            body.Dock = DockStyle.Fill;
+            body.Name = "body";
+            body.RowCount = 2;
+            body.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            body.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            // 
+            // cardDevice
+            // 
+            cardDevice.Controls.Add(deviceFlow);
+            cardDevice.Dock = DockStyle.Fill;
+            cardDevice.Margin = new Padding(0, 0, 0, UiTheme.GapM);
+            cardDevice.Name = "cardDevice";
+            cardDevice.Title = "抓取设置";
+            // 
+            // deviceFlow
+            // 
+            deviceFlow.AutoSize = true;
+            deviceFlow.Controls.Add(label1);
+            deviceFlow.Controls.Add(combo_devList);
+            deviceFlow.Controls.Add(but_start);
+            deviceFlow.Controls.Add(but_stop);
+            deviceFlow.Controls.Add(lblDeviceHint);
+            deviceFlow.Controls.Add(but_open_wf);
+            deviceFlow.Dock = DockStyle.Top;
+            deviceFlow.Name = "deviceFlow";
             // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(3, 14);
+            label1.Font = UiTheme.Body;
+            label1.ForeColor = UiTheme.TextSecondary;
+            label1.Margin = new Padding(0, 7, UiTheme.GapS, 0);
             label1.Name = "label1";
-            label1.Size = new Size(68, 17);
-            label1.TabIndex = 3;
             label1.Text = "网络接口：";
+            // 
+            // combo_devList
+            // 
+            combo_devList.DropDownStyle = ComboBoxStyle.DropDownList;
+            combo_devList.FlatStyle = FlatStyle.Flat;
+            combo_devList.Font = UiTheme.Body;
+            combo_devList.ItemHeight = 19;
+            combo_devList.Margin = new Padding(0, 2, UiTheme.GapM, 0);
+            combo_devList.Name = "combo_devList";
+            combo_devList.Width = 320;
+            // 
+            // but_start
+            // 
+            but_start.Click += but_start_Click;
+            but_start.Name = "but_start";
+            but_start.Text = "开始抓取";
+            but_start.Variant = ButtonVariant.Primary;
             // 
             // but_stop
             // 
-            but_stop.Location = new Point(989, 14);
-            but_stop.Name = "but_stop";
-            but_stop.Size = new Size(54, 23);
-            but_stop.TabIndex = 1;
-            but_stop.Text = "停止";
-            but_stop.UseVisualStyleBackColor = true;
             but_stop.Click += but_stop_Click;
+            but_stop.Name = "but_stop";
+            but_stop.Text = "停止";
             // 
-            // tableLayoutPanel1
+            // lblDeviceHint
             // 
-            tableLayoutPanel1.AutoSize = true;
-            tableLayoutPanel1.ColumnCount = 1;
-            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            tableLayoutPanel1.Controls.Add(panel1, 0, 0);
-            tableLayoutPanel1.Controls.Add(dataGridView1, 0, 1);
-            tableLayoutPanel1.Dock = DockStyle.Fill;
-            tableLayoutPanel1.Location = new Point(0, 0);
-            tableLayoutPanel1.Name = "tableLayoutPanel1";
-            tableLayoutPanel1.RowCount = 2;
-            tableLayoutPanel1.RowStyles.Add(new RowStyle());
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tableLayoutPanel1.Size = new Size(1291, 450);
-            tableLayoutPanel1.TabIndex = 4;
-            // 
-            // panel1
-            // 
-            panel1.Controls.Add(but_open_wf);
-            panel1.Controls.Add(label1);
-            panel1.Controls.Add(combo_devList);
-            panel1.Controls.Add(but_stop);
-            panel1.Controls.Add(but_start);
-            panel1.Location = new Point(3, 3);
-            panel1.Name = "panel1";
-            panel1.Size = new Size(1260, 47);
-            panel1.TabIndex = 5;
+            lblDeviceHint.AutoSize = true;
+            lblDeviceHint.Font = UiTheme.Small;
+            lblDeviceHint.ForeColor = UiTheme.TextTertiary;
+            lblDeviceHint.Margin = new Padding(0, 9, 0, 0);
+            lblDeviceHint.Name = "lblDeviceHint";
+            lblDeviceHint.Text = "速率每 1 秒刷新一次，进程名按 PID 现查";
             // 
             // but_open_wf
             // 
-            but_open_wf.Location = new Point(1049, 14);
-            but_open_wf.Name = "but_open_wf";
-            but_open_wf.Size = new Size(85, 22);
-            but_open_wf.TabIndex = 4;
-            but_open_wf.Text = "系统防火墙";
-            but_open_wf.UseVisualStyleBackColor = true;
             but_open_wf.Click += but_open_wf_Click;
+            but_open_wf.Name = "but_open_wf";
+            but_open_wf.Text = "打开系统防火墙";
+            but_open_wf.Variant = ButtonVariant.Ghost;
+            // 
+            // cardList
+            // 
+            cardList.Controls.Add(pillState);
+            cardList.Controls.Add(dataGridView1);
+            cardList.Controls.Add(lblGridHint);
+            cardList.HeaderAction = pillState;
+            cardList.Description = "按进程聚合的实时连接；启动后每秒刷新一次";
+            cardList.Dock = DockStyle.Fill;
+            cardList.Name = "cardList";
+            cardList.Title = "连接列表";
+            // 
+            // pillState
+            // 
+            pillState.DotColor = UiTheme.TextTertiary;
+            pillState.Name = "pillState";
+            pillState.Text = "未启动";
+            // 
+            // dataGridView1
+            // 
+            dataGridView1.Dock = DockStyle.Fill;
+            dataGridView1.Name = "dataGridView1";
+            UiTheme.ApplyGrid(dataGridView1);
+            dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dataGridView1.EnableHeadersVisualStyles = false;
+            // 
+            // lblGridHint
+            // 
+            lblGridHint.Dock = DockStyle.Fill;
+            lblGridHint.Font = UiTheme.Body;
+            lblGridHint.ForeColor = UiTheme.TextTertiary;
+            lblGridHint.Name = "lblGridHint";
+            lblGridHint.Text = "还没有开始抓取 —— 选一个网卡，点「开始抓取」。";
+            lblGridHint.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // Form_net
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1291, 450);
-            Controls.Add(tableLayoutPanel1);
+            BackColor = UiTheme.WindowBackground;
+            ClientSize = new Size(1184, 470);
+            Controls.Add(root);
+            Font = UiTheme.Body;
+            MinimumSize = new Size(760, 420);
             Name = "Form_net";
-            Text = "网络安全";
+            Text = "网络监控";
             FormClosing += Form_net_FormClosing;
             Load += Form_net_Load;
-            ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
-            tableLayoutPanel1.ResumeLayout(false);
-            panel1.ResumeLayout(false);
-            panel1.PerformLayout();
+            root.ResumeLayout(false);
+            body.ResumeLayout(false);
+            cardDevice.ResumeLayout(false);
+            deviceFlow.ResumeLayout(false);
+            deviceFlow.PerformLayout();
+            cardList.ResumeLayout(false);
             ResumeLayout(false);
-            PerformLayout();
         }
-
-        #endregion
-
-        private DataGridView dataGridView1;
-        private Button but_start;
-        private ComboBox combo_devList;
-        private Label label1;
-        private Button but_stop;
-        private TableLayoutPanel tableLayoutPanel1;
-        private Panel panel1;
-        private Button but_open_wf;
     }
 }

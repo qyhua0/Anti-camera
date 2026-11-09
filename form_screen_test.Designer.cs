@@ -1,4 +1,10 @@
-﻿namespace WinDisplay
+﻿/*
+ * x-保护 (WinDisplay) v2.0 —— 屏幕隐私防护工具
+ * 文件：form_screen_test.Designer.cs
+ * 作者：zhenhua
+ * 说明：全屏闪烁窗的设计器生成代码（无边框、全屏、置顶的基础属性）。
+ */
+namespace WinDisplay
 {
     partial class frm_display_test
     {

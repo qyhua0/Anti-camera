@@ -1,12 +1,30 @@
-﻿using Microsoft.Win32.SafeHandles;
+﻿/*
+ * x-保护 (WinDisplay) v2.0 —— 屏幕隐私防护工具
+ * 文件：util/SecureFileEraser.cs
+ * 作者：zhenhua
+ * 说明：不可恢复删除：多次全量覆写 + 改名 + 真删除（绕过回收站），并处理只读属性与占用中的文件。
+ * 只擦数据区，不承诺擦掉磁盘上的 slack/重映射扇区——那是全盘擦除工具的事。
+ */
+using Microsoft.Win32.SafeHandles;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
 namespace WinDisplay.util
 {
-    // 安全文件擦除器内部类
+    /// <summary>
+    /// 安全文件擦除：随机数据覆写 N 遍 → 改名 → 删除。
+    /// <para>
+    /// 诚实的边界：SSD 的磨损均衡/预留空间、机械盘的坏道重映射、以及文件系统日志都意味着
+    /// 软件覆写不能保证原始数据一定从介质上消失。这个类只是大幅提高恢复门槛，不是保密手段。
+    /// </para>
+    /// </summary>
     internal class SecureFileEraser
     {
+        public const int MinPasses = 1;
+        public const int MaxPasses = 32;
+        private const int MinBufferSize = 4 * 1024;
+        private const int MaxBufferSize = 64 * 1024 * 1024;
+
         /// <summary>
         /// 覆盖文件内容并安全删除文件
         /// </summary>
@@ -14,7 +32,10 @@ namespace WinDisplay.util
         /// <param name="passes">覆盖次数，默认3次</param>
         /// <param name="bufferSize">缓冲区大小，默认1MB</param>
         /// <param name="finalZeroPass">是否在最后用零覆盖，默认true</param>
-        /// <param name="progress">进度回调，参数1:当前已写入字节数，参数2:总字节数</param>
+        /// <param name="progress">进度回调，参数1:当前已写入字节数，参数2:总字节数。回调内异常会被吞掉</param>
+        /// <exception cref="ArgumentException">路径为空</exception>
+        /// <exception cref="ArgumentOutOfRangeException">覆盖次数或缓冲区大小越界</exception>
+        /// <exception cref="FileNotFoundException">文件不存在</exception>
         public static void OverwriteAndDelete(
             string path,
             int passes = 3,
@@ -22,38 +43,51 @@ namespace WinDisplay.util
             bool finalZeroPass = true,
             Action<long, long>? progress = null)
         {
-            // 参数验证
-            if (string.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
-            if (!File.Exists(path)) throw new FileNotFoundException("文件未找到", path);
-            if (passes < 1) throw new ArgumentOutOfRangeException(nameof(passes));
+            // 参数验证。原来只挡了 passes < 1，界面却允许填到 1000 遍（每遍重写整个文件）
+            if (string.IsNullOrWhiteSpace(path)) throw new ArgumentException("文件路径不能为空", nameof(path));
+            if (passes < MinPasses || passes > MaxPasses)
+                throw new ArgumentOutOfRangeException(nameof(passes),
+                    $"覆盖次数必须在 {MinPasses}-{MaxPasses} 之间，收到 {passes}");
+            if (bufferSize < MinBufferSize || bufferSize > MaxBufferSize)
+                throw new ArgumentOutOfRangeException(nameof(bufferSize),
+                    $"缓冲区大小必须在 {MinBufferSize}-{MaxBufferSize} 字节之间，收到 {bufferSize}");
+
+            string fullPath = Path.GetFullPath(path);
+            if (!File.Exists(fullPath)) throw new FileNotFoundException("文件未找到", fullPath);
 
             // 获取文件所在卷的根目录和文件长度
-            string volume = GetVolumeRoot(path); // 例如 "C:\"
-            long length = new FileInfo(path).Length;
+            string volume = GetVolumeRoot(fullPath); // 例如 "C:\"
+            long length = new FileInfo(fullPath).Length;
+
+            // 总进度：随机覆写 passes 遍 + 可选的最后一遍零覆盖
+            long totalBytes = length > 0 ? length * passes + (finalZeroPass ? length : 0) : 0;
+            long doneBytes = 0;
 
             string? tempPath = null; // 临时重命名路径
 
             try
             {
+                // 只读/隐藏/系统属性会让「以写方式打开」直接失败，先清掉
+                try { File.SetAttributes(fullPath, FileAttributes.Normal); }
+                catch { /* 没权限改属性，就让它在校验位置抛出真正的异常 */ }
+
                 // 以独占方式打开文件进行覆盖写入
                 using (var fs = new FileStream(
-                    path,
+                    fullPath,
                     FileMode.Open,
                     FileAccess.Write,
                     FileShare.None, // 独占访问，防止其他进程读取
                     bufferSize,
                     FileOptions.WriteThrough | FileOptions.SequentialScan)) // 直写模式和顺序扫描优化
+                using (var rng = RandomNumberGenerator.Create())
                 {
-                    // 创建随机数生成器和缓冲区
-                    var rng = RandomNumberGenerator.Create();
                     var buffer = new byte[bufferSize];
 
                     // 执行多次随机数据覆盖
-                    for (int pass = 0; pass < passes; pass++)
+                    for (int pass = 0; pass < passes && length > 0; pass++)
                     {
                         fs.Seek(0, SeekOrigin.Begin); // 回到文件开头
                         long remaining = length;
-                        long writtenThisPass = 0;
 
                         // 逐块写入随机数据
                         while (remaining > 0)
@@ -62,46 +96,40 @@ namespace WinDisplay.util
                             rng.GetBytes(buffer, 0, toWrite); // 生成随机数据
                             fs.Write(buffer, 0, toWrite);
                             remaining -= toWrite;
-                            writtenThisPass += toWrite;
+                            doneBytes += toWrite;
 
-                            // 报告进度：当前已写入字节数 + 之前轮次的字节数
-                            progress?.Invoke(writtenThisPass + (long)pass * length,
-                                           length * passes + (finalZeroPass ? length : 0));
+                            ReportProgress(progress, doneBytes, totalBytes);
                         }
 
-                        // 强制刷新到磁盘
+                        // 强制刷新到磁盘（FileStream.Flush(true) 内部就是 FlushFileBuffers）
                         fs.Flush(true);
-                        FlushFileBuffers(fs.SafeFileHandle);
                     }
 
                     // 可选的最终零覆盖（提高安全性）
-                    if (finalZeroPass)
+                    if (finalZeroPass && length > 0)
                     {
                         fs.Seek(0, SeekOrigin.Begin);
-                        var zero = new byte[bufferSize]; // 零缓冲区
+                        Array.Clear(buffer, 0, buffer.Length); // 复用同一个缓冲区，不再另开 1MB
                         long remaining = length;
-                        long writtenZero = 0;
 
-                        // 用零覆盖整个文件
                         while (remaining > 0)
                         {
-                            int toWrite = (int)Math.Min(zero.Length, remaining);
-                            fs.Write(zero, 0, toWrite);
+                            int toWrite = (int)Math.Min(buffer.Length, remaining);
+                            fs.Write(buffer, 0, toWrite);
                             remaining -= toWrite;
-                            writtenZero += toWrite;
+                            doneBytes += toWrite;
 
-                            // 报告进度（包含零覆盖阶段）
-                            progress?.Invoke(passes * length + writtenZero, length * passes + length);
+                            ReportProgress(progress, doneBytes, totalBytes);
                         }
+
                         fs.Flush(true);
-                        FlushFileBuffers(fs.SafeFileHandle);
                     }
                 }
 
-                // 重命名文件（使其更难恢复）
-                var dir = Path.GetDirectoryName(path) ?? throw new InvalidOperationException("无法确定目录");
-                tempPath = Path.Combine(dir, Guid.NewGuid().ToString("N")); // 生成随机名称
-                File.Move(path, tempPath);
+                // 重命名文件（使文件名也不留在目录项里）
+                var dir = Path.GetDirectoryName(fullPath) ?? throw new InvalidOperationException("无法确定目录");
+                tempPath = Path.Combine(dir, Guid.NewGuid().ToString("N"));
+                File.Move(fullPath, tempPath);
 
                 // 刷新卷缓存
                 TryFlushVolumeCache(volume);
@@ -122,6 +150,13 @@ namespace WinDisplay.util
             }
         }
 
+        private static void ReportProgress(Action<long, long>? progress, long done, long total)
+        {
+            if (progress == null) return;
+            try { progress(done, total); }
+            catch { /* 进度回调一般跑在 UI 上，它出错不该打断擦除 */ }
+        }
+
         /// <summary>
         /// 获取文件所在卷的根目录
         /// </summary>
@@ -135,67 +170,50 @@ namespace WinDisplay.util
         }
 
         /// <summary>
-        /// 刷新文件缓冲区到磁盘
-        /// </summary>
-        /// <param name="handle">文件句柄</param>
-        private static void FlushFileBuffers(SafeFileHandle handle)
-        {
-            if (handle == null) return;
-            if (handle.IsInvalid) return;
-            if (!NativeMethods.FlushFileBuffers(handle))
-            {
-                // 刷新失败，后续可以增加日志记录
-            }
-        }
-
-        /// <summary>
-        /// 尝试刷新卷缓存
+        /// 尝试刷新整卷缓存。做法是按微软文档打开卷句柄（需要写权限）后调 FlushFileBuffers。
+        /// <para>
+        /// 这里原来发的是 <c>DeviceIoControl(h, 0x002D4808, ...)</c> 并注释成「刷新缓存IO控制命令」。
+        /// 0x002D4808 = CTL_CODE(FILE_DEVICE_STORAGE=0x2D, 0x202, METHOD_BUFFERED, FILE_ANY_ACCESS)
+        /// = <b>IOCTL_STORAGE_EJECT_MEDIA（弹出介质）</b>，跟刷新缓存毫无关系：
+        /// 对 U 盘/读卡器执行文件粉碎时，会先把用户的盘给「出盘」。
+        /// 弹盘是写操作且不可逆，绝不能再出现在这条路径上。
+        /// </para>
         /// </summary>
         /// <param name="volumeRoot">卷根目录，如"C:\"</param>
         private static void TryFlushVolumeCache(string volumeRoot)
         {
+            // 只处理盘符形式的根（"C:\"）。UNC 共享、\\?\ 卷 GUID 之类拼不出设备路径，直接跳过
+            if (volumeRoot.Length != 3 || volumeRoot[1] != ':' || volumeRoot[2] != '\\') return;
+
             // 将卷路径转换为设备路径，如"C:\" -> "\\.\C:"
-            string devicePath = @"\\.\\" + volumeRoot.TrimEnd('\\') + ":";
-            SafeFileHandle? h = null;
+            string devicePath = @"\\.\" + volumeRoot.TrimEnd('\\') + ":";
 
             try
             {
-                // 打开卷设备
-                h = NativeMethods.CreateFile(
+                using SafeFileHandle h = NativeMethods.CreateFile(
                     devicePath,
-                    NativeMethods.GENERIC_READ | NativeMethods.GENERIC_WRITE,
+                    NativeMethods.GENERIC_WRITE,   // FlushFileBuffers 只要求写权限，不需要读权限
                     NativeMethods.FILE_SHARE_READ | NativeMethods.FILE_SHARE_WRITE,
                     IntPtr.Zero,
                     NativeMethods.OPEN_EXISTING,
                     0,
                     IntPtr.Zero);
 
-                // 检查句柄是否有效
                 if (h == null || h.IsInvalid)
                 {
-                    // 无法打开设备，可能没有管理员权限
+                    // 打不开卷设备：普通用户对固定磁盘没有写权限（ERROR_ACCESS_DENIED），属正常情况。
+                    // 文件句柄上的 Flush(true) 已经把本次写入落盘，这里只是尽力而为地顺带刷整卷。
                     return;
                 }
 
-                // 发送刷新缓存IO控制命令
-                bool ok = NativeMethods.DeviceIoControl(
-                    h,
-                    NativeMethods.IOCTL_STORAGE_FLUSH_CACHE,
-                    IntPtr.Zero, 0,  // 输入缓冲区和大小
-                    IntPtr.Zero, 0,  // 输出缓冲区和大小
-                    out int bytesReturned,
-                    IntPtr.Zero);
-
-                if (!ok)
+                if (!NativeMethods.FlushFileBuffers(h))
                 {
-                    // 尽力而为，可以记录错误但不抛出异常
-                    // 可以使用 Marshal.GetLastWin32Error() 获取错误代码
+                    // 尽力而为，不抛异常（可用 Marshal.GetLastWin32Error() 排查）
                 }
             }
-            finally
+            catch
             {
-                // 确保句柄被关闭
-                if (h != null && !h.IsClosed) h.Close();
+                // 刷新卷缓存失败不影响「文件已被覆写并删除」这个事实
             }
         }
 
@@ -203,17 +221,13 @@ namespace WinDisplay.util
         private static class NativeMethods
         {
             // Windows API 常量定义
-            public const uint GENERIC_READ = 0x80000000;
             public const uint GENERIC_WRITE = 0x40000000;
             public const uint FILE_SHARE_READ = 0x00000001;
             public const uint FILE_SHARE_WRITE = 0x00000002;
             public const uint OPEN_EXISTING = 3;
 
-            // 存储设备刷新缓存IO控制代码
-            public const uint IOCTL_STORAGE_FLUSH_CACHE = 0x002D4808;
-
             // 创建文件/设备句柄
-            [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+            [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
             public static extern SafeFileHandle CreateFile(
                 string lpFileName,
                 uint dwDesiredAccess,
@@ -223,19 +237,7 @@ namespace WinDisplay.util
                 uint dwFlagsAndAttributes,
                 IntPtr hTemplateFile);
 
-            // 设备IO控制
-            [DllImport("kernel32.dll", SetLastError = true)]
-            public static extern bool DeviceIoControl(
-                SafeFileHandle hDevice,
-                uint dwIoControlCode,
-                IntPtr lpInBuffer,
-                int nInBufferSize,
-                IntPtr lpOutBuffer,
-                int nOutBufferSize,
-                out int lpBytesReturned,
-                IntPtr lpOverlapped);
-
-            // 刷新文件缓冲区
+            // 刷新文件/卷缓冲区。对卷句柄调用即刷新整卷缓存
             [DllImport("kernel32.dll", SetLastError = true)]
             [return: MarshalAs(UnmanagedType.Bool)]
             public static extern bool FlushFileBuffers(SafeFileHandle hFile);

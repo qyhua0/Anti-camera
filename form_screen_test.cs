@@ -1,4 +1,11 @@
-﻿using System;
+﻿/*
+ * x-保护 (WinDisplay) v2.0 —— 屏幕隐私防护工具
+ * 文件：form_screen_test.cs
+ * 作者：zhenhua
+ * 说明：全屏闪烁窗（frm_display_test）：以约 45Hz 在黑/白之间高频切换并轻微抖动，
+ * 频率刻意错开常见摄像头帧率，让翻拍画面拿不到稳定内容。
+ */
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -10,6 +17,10 @@ using System.Windows.Forms;
 
 namespace WinDisplay
 {
+    /// <summary>
+    /// 全屏高频闪烁窗：黑/白逐半周期对切 + 随机噪点，让翻拍镜头拿不到稳定画面。
+    /// 由 form_screen 的「高频闪烁」按钮 Show() 出来，非模态，按 Esc 关闭。
+    /// </summary>
     public partial class frm_display_test : Form
     {
         private readonly System.Windows.Forms.Timer _timer;
@@ -119,6 +130,17 @@ namespace WinDisplay
                 StopFlicker();
                 Close();
             }
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            // _timer 不在 components 容器里创建，Form.Dispose 不会顺带释放它；
+            // 更重要的是窗体被别人（主窗口关闭 / Application.Exit）关掉时，
+            // 还在跑的 Tick 会往已释放的窗体上设 Interval/BackColor → ObjectDisposedException
+            StopFlicker();
+            _timer.Dispose();
+
+            base.OnFormClosed(e);
         }
 
         private void Form2_Load(object sender, EventArgs e)

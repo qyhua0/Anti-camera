@@ -1,4 +1,11 @@
-﻿using System;
+﻿/*
+ * x-保护 (WinDisplay) v2.0 —— 屏幕隐私防护工具
+ * 文件：util/SystemTools.cs
+ * 作者：zhenhua
+ * 说明：系统安全工具辅助：按进程名 + 主窗口标题判断工具是否已经开着，
+ * 以及带句柄释放地启动外部进程（原实现每点一次就漏一批 Process 内核句柄）。
+ */
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -25,18 +32,42 @@ namespace WinDisplay.util
         public static bool IsProcessRunningWithWindowTitle(string processName, string titleKeyword)
         {
             var processes = Process.GetProcessesByName(processName);
-            foreach (var process in processes)
+            try
             {
-                try
+                foreach (var process in processes)
                 {
-                    if (process.MainWindowTitle.Contains(titleKeyword))
+                    try
                     {
-                        return true;
+                        if (process.MainWindowTitle.Contains(titleKeyword ?? string.Empty))
+                        {
+                            return true;
+                        }
+                    }
+                    catch (Exception ex) when (ex is InvalidOperationException or ArgumentException)
+                    {
+                        // 忽略已退出 / 拿不到主窗口标题的进程
                     }
                 }
-                catch (InvalidOperationException) { /* 忽略已退出的进程 */ }
+            }
+            finally
+            {
+                DisposeAll(processes);
             }
             return false;
+        }
+
+        /// <summary>
+        /// Process 对象拿着进程/窗口的内核句柄，查完必须释放。
+        /// 原实现三处 GetProcessesByName 外加 Process.Start 的返回值一个都没 Dispose，
+        /// 每点一下「打开设备管理器/任务管理器」就漏一批。
+        /// </summary>
+        private static void DisposeAll(Process[] processes)
+        {
+            foreach (var p in processes)
+            {
+                try { p.Dispose(); }
+                catch { /* 释放失败没意义，不能影响业务 */ }
+            }
         }
 
 
@@ -46,7 +77,7 @@ namespace WinDisplay.util
         /// </summary>
         /// <param name="program">程序名或完整路径，如 notepad.exe 或 C:\Windows\System32\notepad.exe</param>
         /// <param name="displayName">显示给用户的程序名称（用于错误提示）</param>
-        public static void StartSystemTool(string program, string displayName)
+        public static bool StartSystemTool(string program, string displayName)
         {
 
             try
@@ -58,7 +89,8 @@ namespace WinDisplay.util
                     CreateNoWindow = false
                 };
 
-                Process.Start(startInfo);
+                using Process? started = Process.Start(startInfo);
+                return true;
             }
             catch (Exception ex)
             {
@@ -68,6 +100,7 @@ namespace WinDisplay.util
                     "启动失败",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
+                return false;
             }
         }
 
@@ -83,38 +116,45 @@ namespace WinDisplay.util
         public static bool ActivateWindowIfRunning(string processName, string titleKeyword)
         {
             var processes = Process.GetProcessesByName(processName);
-            foreach (var process in processes)
+            try
             {
-                try
+                foreach (var process in processes)
                 {
-                    // 确保进程未退出
-                    if (process.HasExited) continue;
-
-                    if (process.MainWindowTitle.Contains(titleKeyword))
+                    try
                     {
-                        IntPtr hWnd = process.MainWindowHandle;
+                        // 确保进程未退出
+                        if (process.HasExited) continue;
 
-                        // 可能需要先刷新以获取有效句柄
-                        if (hWnd == IntPtr.Zero)
+                        if (process.MainWindowTitle.Contains(titleKeyword ?? string.Empty))
                         {
-                            process.Refresh();
-                            hWnd = process.MainWindowHandle;
-                        }
+                            IntPtr hWnd = process.MainWindowHandle;
 
-                        if (hWnd != IntPtr.Zero)
-                        {
-                            // 恢复最小化窗口，并置顶激活
-                            ShowWindow(hWnd, SW_RESTORE);
-                            SetForegroundWindow(hWnd);
-                            return true;
+                            // 可能需要先刷新以获取有效句柄
+                            if (hWnd == IntPtr.Zero)
+                            {
+                                process.Refresh();
+                                hWnd = process.MainWindowHandle;
+                            }
+
+                            if (hWnd != IntPtr.Zero)
+                            {
+                                // 恢复最小化窗口，并置顶激活
+                                ShowWindow(hWnd, SW_RESTORE);
+                                SetForegroundWindow(hWnd);
+                                return true;
+                            }
                         }
                     }
+                    catch (Exception ex) when (ex is InvalidOperationException or ArgumentException)
+                    {
+                        // 忽略因进程已退出导致的异常
+                        continue;
+                    }
                 }
-                catch (InvalidOperationException)
-                {
-                    // 忽略因进程已退出导致的异常
-                    continue;
-                }
+            }
+            finally
+            {
+                DisposeAll(processes);
             }
             return false; // 未找到匹配的运行实例
         }
@@ -139,33 +179,40 @@ namespace WinDisplay.util
 
             // 检查进程是否已存在
             var existingProcesses = Process.GetProcessesByName(processName);
-            if (existingProcesses.Length > 0)
+            try
             {
-                // 激活第一个找到的实例
-                IntPtr hWnd = existingProcesses[0].MainWindowHandle;
+                if (existingProcesses.Length > 0)
+                {
+                    // 激活第一个找到的实例
+                    IntPtr hWnd = existingProcesses[0].MainWindowHandle;
 
-                if (hWnd != IntPtr.Zero)
-                {
-                    ShowWindow(hWnd, SW_RESTORE);  // 恢复最小化窗口
-                    SetForegroundWindow(hWnd);     // 激活并置顶
-                }
-                else
-                {
-                    // 窗口句柄可能还未创建，可以尝试刷新或稍等
-                    existingProcesses[0].Refresh();
-                    hWnd = existingProcesses[0].MainWindowHandle;
                     if (hWnd != IntPtr.Zero)
                     {
-                        ShowWindow(hWnd, SW_RESTORE);
-                        SetForegroundWindow(hWnd);
+                        ShowWindow(hWnd, SW_RESTORE);  // 恢复最小化窗口
+                        SetForegroundWindow(hWnd);     // 激活并置顶
                     }
                     else
                     {
-                        // 仍无法获取句柄，放弃激活
-                        MessageBox.Show("目标程序已在运行，但无法激活窗口。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        // 窗口句柄可能还未创建，可以尝试刷新或稍等
+                        existingProcesses[0].Refresh();
+                        hWnd = existingProcesses[0].MainWindowHandle;
+                        if (hWnd != IntPtr.Zero)
+                        {
+                            ShowWindow(hWnd, SW_RESTORE);
+                            SetForegroundWindow(hWnd);
+                        }
+                        else
+                        {
+                            // 仍无法获取句柄，放弃激活
+                            MessageBox.Show("目标程序已在运行，但无法激活窗口。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
                     }
+                    return true;
                 }
-                return true;
+            }
+            finally
+            {
+                DisposeAll(existingProcesses);
             }
 
             // 进程未运行，启动新实例
@@ -179,7 +226,7 @@ namespace WinDisplay.util
                     CreateNoWindow = false   // GUI程序应设为false
                 };
 
-                Process.Start(startInfo);
+                using Process? started = Process.Start(startInfo);
                 return true;
             }
             catch (Exception ex)
